@@ -194,11 +194,11 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         backgroundColor: CupertinoColors.black,
         child: Stack(
           children: [
-            Listener(
-              onPointerDown: (_) => _pointers++,
-              onPointerUp: (_) => _pointers--,
-              child: CameraPreview(
-                _cameraController!,
+            CameraPreview(
+              _cameraController!,
+              child: Listener(
+                onPointerDown: (_) => _pointers++,
+                onPointerUp: (_) => _pointers--,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     return GestureDetector(
