@@ -100,7 +100,7 @@ class ClipController extends ChangeNotifier {
   }
 
   void onFinished() {
-    timmedSessionList = [];
+    clippedSessionList = [];
 
     notifyListeners();
   }
