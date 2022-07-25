@@ -86,7 +86,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
     //   await _cameraController!.dispose();
     // }
 
-    final previousCameraController = _cameraController;
+    // final previousCameraController = _cameraController;
 
     final CameraController cameraController = CameraController(
       cameraDescription,
