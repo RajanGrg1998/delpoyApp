@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -94,7 +95,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
       imageFormatGroup: ImageFormatGroup.jpeg,
     );
 
-    await previousCameraController?.dispose();
+    // await previousCameraController?.dispose();
     resetCameraValues();
 
     if (mounted) {
@@ -194,21 +195,23 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         backgroundColor: CupertinoColors.black,
         child: Stack(
           children: [
-            CameraPreview(
-              _cameraController!,
-              child: Listener(
-                onPointerDown: (_) => _pointers++,
-                onPointerUp: (_) => _pointers--,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onScaleStart: _handleScaleStart,
-                      onScaleUpdate: _handleScaleUpdate,
-                      onTapDown: (TapDownDetails details) =>
-                          onViewFinderTap(details, constraints),
-                    );
-                  },
+            Center(
+              child: CameraPreview(
+                _cameraController!,
+                child: Listener(
+                  onPointerDown: (_) => _pointers++,
+                  onPointerUp: (_) => _pointers--,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onScaleStart: _handleScaleStart,
+                        onScaleUpdate: _handleScaleUpdate,
+                        onTapDown: (TapDownDetails details) =>
+                            onViewFinderTap(details, constraints),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -702,7 +705,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
               child: const Text('Yes'),
               onPressed: () async {
                 EasyLoading.show(status: 'Session Saving...');
-                //await GallerySaver.saveVideo(path);
+                await GallerySaver.saveVideo(path);
                 showInSnackBar('Recording saved to gallery');
                 EasyLoading.showSuccess('Session saved to Gallery');
                 EasyLoading.dismiss();
