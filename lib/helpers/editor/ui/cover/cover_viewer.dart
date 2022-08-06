@@ -1,14 +1,14 @@
+import 'package:clip_test/helpers/editor/domain/bloc/controller.dart';
+import 'package:clip_test/helpers/editor/domain/entities/cover_data.dart';
+import 'package:clip_test/helpers/editor/domain/entities/transform_data.dart';
+import 'package:clip_test/helpers/editor/ui/crop/crop_grid_painter.dart';
 import 'package:flutter/material.dart';
 
-import '../../domain/bloc/controller.dart';
-import '../../domain/entities/cover_data.dart';
-import '../../domain/entities/transform_data.dart';
-import '../crop/crop_grid_painter.dart';
-import '../transform.dart';
+import 'package:clip_test/helpers/editor/ui/transform.dart';
 
 class CoverViewer extends StatefulWidget {
   /// It is the viewer that show the selected cover
-  CoverViewer({
+  const CoverViewer({
     Key? key,
     required this.controller,
     this.noCoverText = 'No selection',
@@ -21,14 +21,13 @@ class CoverViewer extends StatefulWidget {
   final String noCoverText;
 
   @override
-  _CoverViewerState createState() => _CoverViewerState();
+  State<CoverViewer> createState() => _CoverViewerState();
 }
 
 class _CoverViewerState extends State<CoverViewer> {
   final ValueNotifier<Rect> _rect = ValueNotifier<Rect>(Rect.zero);
-  final ValueNotifier<TransformData> _transform = ValueNotifier<TransformData>(
-    TransformData(rotation: 0.0, scale: 1.0, translate: Offset.zero),
-  );
+  final ValueNotifier<TransformData> _transform =
+      ValueNotifier<TransformData>(TransformData());
 
   Size _layout = Size.zero;
 
@@ -64,8 +63,9 @@ class _CoverViewerState extends State<CoverViewer> {
   }
 
   void _checkIfCoverIsNull() {
-    if (widget.controller.selectedCoverVal!.thumbData == null)
-      widget.controller.generateDefaultCoverThumnail();
+    if (widget.controller.selectedCoverVal!.thumbData == null) {
+      widget.controller.generateDefaultCoverThumbnail();
+    }
   }
 
   //-----------//
@@ -112,7 +112,7 @@ class _CoverViewerState extends State<CoverViewer> {
                               if (_layout != size) {
                                 _layout = size;
                                 // init the widget with controller values
-                                WidgetsBinding.instance!
+                                WidgetsBinding.instance
                                     .addPostFrameCallback((_) {
                                   _scaleRect();
                                 });

@@ -195,26 +195,11 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         backgroundColor: CupertinoColors.black,
         child: Stack(
           children: [
-            Center(
-              child: CameraPreview(
-                _cameraController!,
-                child: Listener(
-                  onPointerDown: (_) => _pointers++,
-                  onPointerUp: (_) => _pointers--,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onScaleStart: _handleScaleStart,
-                        onScaleUpdate: _handleScaleUpdate,
-                        onTapDown: (TapDownDetails details) =>
-                            onViewFinderTap(details, constraints),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
+            Platform.isIOS
+                ? Center(
+                    child: cameraPreview(),
+                  )
+                : cameraPreview(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Column(
@@ -564,6 +549,27 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         ),
       );
     }
+  }
+
+  CameraPreview cameraPreview() {
+    return CameraPreview(
+      _cameraController!,
+      child: Listener(
+        onPointerDown: (_) => _pointers++,
+        onPointerUp: (_) => _pointers--,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onScaleStart: _handleScaleStart,
+              onScaleUpdate: _handleScaleUpdate,
+              onTapDown: (TapDownDetails details) =>
+                  onViewFinderTap(details, constraints),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   void _showCameraException(CameraException e) {

@@ -1,21 +1,20 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:clip_test/helpers/editor/domain/entities/trim_style.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_flutter/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter/statistics.dart';
+
 import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:path_provider/path_provider.dart';
-
+import 'package:clip_test/helpers/editor/domain/entities/crop_style.dart';
+import 'package:clip_test/helpers/editor/domain/entities/cover_style.dart';
+import 'package:clip_test/helpers/editor/domain/entities/cover_data.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-
-import '../entities/cover_data.dart';
-import '../entities/cover_style.dart';
-import '../entities/crop_style.dart';
-import '../entities/trim_style.dart';
 
 enum RotateDirection { left, right }
 
@@ -71,10 +70,10 @@ class VideoEditorController extends ChangeNotifier {
     CoverSelectionStyle? coverStyle,
     CropGridStyle? cropStyle,
   })  : _video = VideoPlayerController.file(file),
-        this._maxDuration = maxDuration ?? Duration.zero,
-        this.cropStyle = cropStyle ?? CropGridStyle(),
-        this.coverStyle = coverStyle ?? CoverSelectionStyle(),
-        this.trimStyle = trimStyle ?? TrimSliderStyle();
+        _maxDuration = maxDuration ?? Duration.zero,
+        cropStyle = cropStyle ?? CropGridStyle(),
+        coverStyle = coverStyle ?? CoverSelectionStyle(),
+        trimStyle = trimStyle ?? TrimSliderStyle();
 
   int _rotation = 0;
   bool _isTrimming = false;
@@ -94,13 +93,14 @@ class VideoEditorController extends ChangeNotifier {
 
   Duration _trimEnd = Duration.zero;
   Duration _trimStart = Duration.zero;
-  VideoPlayerController _video;
+  final VideoPlayerController _video;
 
   /// The max duration to trim the [file] video
   Duration _maxDuration;
 
   // Selected cover value
-  ValueNotifier<CoverData?> _selectedCover = ValueNotifier<CoverData?>(null);
+  final ValueNotifier<CoverData?> _selectedCover =
+      ValueNotifier<CoverData?>(null);
 
   /// This is the width of the [file] video
   double _videoWidth = 0;
@@ -187,34 +187,9 @@ class VideoEditorController extends ChangeNotifier {
   /// The [preferredCropAspectRatio] param is the selected aspect ratio (9:16, 3:4, 1:1, ...)
   double? get preferredCropAspectRatio => _preferredCropAspectRatio;
   set preferredCropAspectRatio(double? value) {
-    if (value == null) {
-      _preferredCropAspectRatio = value;
-      notifyListeners();
-    } else if (value >= 0) {
-      final length = cropStyle.boundariesLength * 4;
-      final videoWidth = videoDimension.width;
-      final videoHeight = videoDimension.height;
-      final cropHeight = (cacheMaxCrop.dy - cacheMinCrop.dy) * videoHeight;
-      final cropWidth = (cacheMaxCrop.dx - cacheMinCrop.dx) * videoWidth;
-      Offset newMax = Offset(
-        cropWidth / videoWidth,
-        (cropWidth / value) / videoWidth,
-      );
-
-      if (newMax.dy > _max.dy || newMax.dx > _max.dx) {
-        newMax = Offset(
-          (cropHeight * value) / cropHeight,
-          cropHeight / videoHeight,
-        );
-      }
-
-      if ((newMax.dx - cacheMinCrop.dx) * videoWidth > length &&
-          (newMax.dy - cacheMinCrop.dy) * videoHeight > length) {
-        cacheMaxCrop = newMax;
-        _preferredCropAspectRatio = value;
-        notifyListeners();
-      }
-    }
+    if (preferredCropAspectRatio == value) return;
+    _preferredCropAspectRatio = value;
+    notifyListeners();
   }
 
   //----------------//
@@ -236,13 +211,14 @@ class VideoEditorController extends ChangeNotifier {
     _maxDuration = _maxDuration == Duration.zero ? videoDuration : _maxDuration;
 
     // Trim straight away when maxDuration is lower than video duration
-    if (_maxDuration < videoDuration)
+    if (_maxDuration < videoDuration) {
       updateTrim(
           0.0, _maxDuration.inMilliseconds / videoDuration.inMilliseconds);
-    else
+    } else {
       _updateTrimRange();
+    }
 
-    generateDefaultCoverThumnail();
+    generateDefaultCoverThumbnail();
 
     notifyListeners();
   }
@@ -252,15 +228,16 @@ class VideoEditorController extends ChangeNotifier {
     if (_video.value.isPlaying) await _video.pause();
     _video.removeListener(_videoListener);
     final executions = await FFmpegKit.listSessions();
-    if (executions.length > 0) await FFmpegKit.cancel();
+    if (executions.isNotEmpty) await FFmpegKit.cancel();
     _video.dispose();
     super.dispose();
   }
 
   void _videoListener() {
     final position = videoPosition;
-    if (position < _trimStart || position >= _trimEnd)
+    if (position < _trimStart || position >= _trimEnd) {
       _video.seekTo(_trimStart);
+    }
   }
 
   //----------//
@@ -309,10 +286,11 @@ class VideoEditorController extends ChangeNotifier {
     _trimStart = duration * minTrim;
     _trimEnd = duration * maxTrim;
 
-    if (_trimStart != Duration.zero || _trimEnd != videoDuration)
+    if (_trimStart != Duration.zero || _trimEnd != videoDuration) {
       _isTrimmed = true;
-    else
+    } else {
       _isTrimmed = false;
+    }
 
     _checkUpdateDefaultCover();
 
@@ -358,12 +336,13 @@ class VideoEditorController extends ChangeNotifier {
   /// If [isTrimming] is `false` or  [_selectedCover] is `null`, update _selectedCover
   /// Update only milliseconds time for performance reason
   void _checkUpdateDefaultCover() {
-    if (!_isTrimming || _selectedCover.value == null)
+    if (!_isTrimming || _selectedCover.value == null) {
       updateSelectedCover(CoverData(timeMs: startTrim.inMilliseconds));
+    }
   }
 
   /// Generate cover at [startTrim] time in milliseconds
-  void generateDefaultCoverThumnail() async {
+  void generateDefaultCoverThumbnail() async {
     final defaultCover =
         await generateCoverThumbnail(timeMs: startTrim.inMilliseconds);
     updateSelectedCover(defaultCover);
@@ -374,14 +353,14 @@ class VideoEditorController extends ChangeNotifier {
   /// return [CoverData] depending on [timeMs] milliseconds
   Future<CoverData> generateCoverThumbnail(
       {int timeMs = 0, int quality = 10}) async {
-    final Uint8List? _thumbData = await VideoThumbnail.thumbnailData(
+    final Uint8List? thumbData = await VideoThumbnail.thumbnailData(
       imageFormat: ImageFormat.JPEG,
       video: file.path,
       timeMs: timeMs,
       quality: quality,
     );
 
-    return new CoverData(thumbData: _thumbData, timeMs: timeMs);
+    return CoverData(thumbData: thumbData, timeMs: timeMs);
   }
 
   /// Get the [selectedCover] notifier
@@ -415,8 +394,10 @@ class VideoEditorController extends ChangeNotifier {
   /// The result is in the format `transpose=2` (repeated for every 90 degrees rotations)
   String _getRotation() {
     List<String> transpose = [];
-    for (int i = 0; i < _rotation / 90; i++) transpose.add("transpose=2");
-    return transpose.length > 0 ? "${transpose.join(',')}" : "";
+    for (int i = 0; i < _rotation / 90; i++) {
+      transpose.add("transpose=2");
+    }
+    return transpose.isNotEmpty ? transpose.join(',') : "";
   }
 
   //--------------//
@@ -439,7 +420,9 @@ class VideoEditorController extends ChangeNotifier {
 
   /// Export the video using this edition parameters and return a `File`.
   ///
-  /// The [onCompleted] param must be set to retun the exported [File] video
+  /// The [onCompleted] param must be set to return the exported [File] video.
+  ///
+  /// The [onError] function provides the [Exception] and [StackTrace] that causes the exportation error.
   ///
   /// If the [name] is `null`, then it uses this video filename.
   ///
@@ -452,7 +435,9 @@ class VideoEditorController extends ChangeNotifier {
   /// The [customInstruction] param can be set to add custom commands to the FFmpeg eexecution
   /// (i.e. `-an` to mute the generated video), some commands require the GPL package
   ///
-  /// The [onProgress] is called while the video is exporting. This argument is usually used to update the export progress percentage.
+  /// The [onProgress] is called while the video is exporting.
+  /// This argument is usually used to update the export progress percentage.
+  /// This function return [Statistics] from FFmpeg session and the [double] progress value between 0.0 and 1.0.
   ///
   /// The [preset] is the `compress quality` **(Only available on GPL package)**.
   /// A slower preset will provide better compression (compression is quality per filesize).
@@ -460,19 +445,20 @@ class VideoEditorController extends ChangeNotifier {
   ///
   /// Set [isFiltersEnabled] to `false` if you do not want to apply any changes
   Future<void> exportVideo({
-    required void Function(File? file) onCompleted,
+    required void Function(File file) onCompleted,
+    void Function(Object, StackTrace)? onError,
     String? name,
     String? outDir,
     String format = "mp4",
     double scale = 1.0,
     String? customInstruction,
-    void Function(Statistics)? onProgress,
+    void Function(Statistics, double)? onProgress,
     VideoExportPreset preset = VideoExportPreset.none,
     bool isFiltersEnabled = true,
   }) async {
     final String tempPath = outDir ?? (await getTemporaryDirectory()).path;
     final String videoPath = file.path;
-    if (name == null) name = path.basenameWithoutExtension(videoPath);
+    name ??= path.basenameWithoutExtension(videoPath);
     final int epoch = DateTime.now().millisecondsSinceEpoch;
     final String outputPath = "$tempPath/${name}_$epoch.$format";
 
@@ -492,9 +478,10 @@ class VideoEditorController extends ChangeNotifier {
     final List<String> filters = [crop, scaleInstruction, rotation, gif];
     filters.removeWhere((item) => item.isEmpty);
     final String filter = filters.isNotEmpty && isFiltersEnabled
-        ? "-filter:v " + filters.join(",")
+        ? "-filter:v ${filters.join(",")}"
         : "";
     final String execute =
+        // ignore: unnecessary_string_escapes
         " -i \'$videoPath\' ${customInstruction ?? ""} $filter ${_getPreset(preset)} $trim -y $outputPath";
 
     // PROGRESS CALLBACKS
@@ -504,15 +491,29 @@ class VideoEditorController extends ChangeNotifier {
         final state =
             FFmpegKitConfig.sessionStateToString(await session.getState());
         final code = await session.getReturnCode();
-        final failStackTrace = await session.getFailStackTrace();
 
-        print(
-            "FFmpeg process exited with state $state and return code $code.${(failStackTrace == null) ? "" : "\\n" + failStackTrace}");
-
-        onCompleted(code?.isValueSuccess() == true ? File(outputPath) : null);
+        if (code?.isValueSuccess() == true) {
+          onCompleted(File(outputPath));
+        } else {
+          if (onError != null) {
+            onError(
+              Exception(
+                  'FFmpeg process exited with state $state and return code $code.\n${await session.getOutput()}'),
+              StackTrace.current,
+            );
+          }
+          return;
+        }
       },
       null,
-      onProgress != null ? onProgress : null,
+      onProgress != null
+          ? (stats) {
+              // Progress value of encoded video
+              double progressValue =
+                  stats.getTime() / (_trimEnd - _trimStart).inMilliseconds;
+              onProgress(stats, progressValue.clamp(0.0, 1.0));
+            }
+          : null,
     );
   }
 
@@ -579,7 +580,9 @@ class VideoEditorController extends ChangeNotifier {
 
   /// Export this selected cover, or by default the first one, return an image [File].
   ///
-  /// The [onCompleted] param must be set to retun the exported [File] cover
+  /// The [onCompleted] param must be set to return the exported [File] cover
+  ///
+  /// The [onError] function provides the [Exception] and [StackTrace] that causes the exportation error.
   ///
   /// If the [name] is `null`, then it uses this video filename.
   ///
@@ -591,9 +594,14 @@ class VideoEditorController extends ChangeNotifier {
   ///
   /// The [quality] of the exported image (from 0 to 100 ([more info](https://pub.dev/packages/video_thumbnail)))
   ///
+  /// The [onProgress] is called while the video is exporting.
+  /// This argument is usually used to update the export progress percentage.
+  /// This function return [Statistics] from FFmpeg session.
+  ///
   /// Set [isFiltersEnabled] to `false` if you do not want to apply any changes
   Future<void> extractCover({
-    required void Function(File? file) onCompleted,
+    required void Function(File file) onCompleted,
+    void Function(Object, StackTrace)? onError,
     String? name,
     String? outDir,
     String format = "jpg",
@@ -604,14 +612,17 @@ class VideoEditorController extends ChangeNotifier {
   }) async {
     final String tempPath = outDir ?? (await getTemporaryDirectory()).path;
     // file generated from the thumbnail library or video source
-    final String? _coverPath = await _generateCoverFile(
-      quality: quality,
-    );
-    if (_coverPath == null) {
-      print("ERROR ON COVER EXTRACTION WITH VideoThumbnail LIBRARY");
-      return null;
+    final String? coverPath = await _generateCoverFile(quality: quality);
+    if (coverPath == null) {
+      if (onError != null) {
+        onError(
+          Exception('VideoThumbnail library error while exporting the cover'),
+          StackTrace.current,
+        );
+      }
+      return;
     }
-    if (name == null) name = path.basenameWithoutExtension(file.path);
+    name ??= path.basenameWithoutExtension(file.path);
     final int epoch = DateTime.now().millisecondsSinceEpoch;
     final String outputPath = "$tempPath/${name}_$epoch.$format";
 
@@ -627,9 +638,10 @@ class VideoEditorController extends ChangeNotifier {
     final List<String> filters = [crop, scaleInstruction, rotation];
     filters.removeWhere((item) => item.isEmpty);
     final String filter = filters.isNotEmpty && isFiltersEnabled
-        ? "-filter:v " + filters.join(",")
+        ? "-filter:v ${filters.join(",")}"
         : "";
-    final String execute = "-i \'$_coverPath\' $filter -y $outputPath";
+    // ignore: unnecessary_string_escapes
+    final String execute = "-i \'$coverPath\' $filter -y $outputPath";
 
     // PROGRESS CALLBACKS
     await FFmpegKit.executeAsync(
@@ -638,15 +650,22 @@ class VideoEditorController extends ChangeNotifier {
         final state =
             FFmpegKitConfig.sessionStateToString(await session.getState());
         final code = await session.getReturnCode();
-        final failStackTrace = await session.getFailStackTrace();
 
-        print(
-            "FFmpeg process exited with state $state and return code $code.${(failStackTrace == null) ? "" : "\\n" + failStackTrace}");
-
-        onCompleted(code?.isValueSuccess() == true ? File(outputPath) : null);
+        if (code?.isValueSuccess() == true) {
+          onCompleted(File(outputPath));
+        } else {
+          if (onError != null) {
+            onError(
+              Exception(
+                  'FFmpeg process exited with state $state and return code $code.\n${await session.getOutput()}'),
+              StackTrace.current,
+            );
+          }
+          return;
+        }
       },
       null,
-      onProgress != null ? onProgress : null,
+      onProgress,
     );
   }
 }

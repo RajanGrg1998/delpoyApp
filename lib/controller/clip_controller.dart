@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
@@ -5,21 +7,83 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 class ClipController extends ChangeNotifier {
   //camera
-  List<String> clippedSessionList = [];
+  List<VideoFileModel> clippedSessionList = [];
 
   List<String> timmedSessionList = [];
 
-  List<String> selectedItem = [];
+  List<VideoFileModel> selectedItem = [];
   bool isMultiSelectionEnabled = false;
+  bool isRotationVideoEditorPressed = false;
 
   // File? videofile;
 
+//to change camera recording view from landscape to potrait
+
+  bool isLandscapeRecordingClicked = false;
+
+  bool isPotraitRecordingClicked = false;
+
+  bool isCameraLoadingIndicator = false;
+
+  changeCameraLoadingIndicatodValue(bool value) {
+    isCameraLoadingIndicator = value;
+    notifyListeners();
+    print('object: $isLandscapeRecordingClicked');
+  }
+
+  changeRotationButtonPressed(bool value) {
+    isRotationVideoEditorPressed = value;
+    notifyListeners();
+  }
+
+  //for change view from landscape to potrait
+  changeIsLandscapeRecordingClickedValue(bool value) {
+    isLandscapeRecordingClicked = value;
+    notifyListeners();
+    print('object: $isLandscapeRecordingClicked');
+  }
+
+  //for change view from potrait to landscape
+  changeIsPotraitRecordingClickedValue(bool value) {
+    isPotraitRecordingClicked = value;
+    notifyListeners();
+    print('object: $isLandscapeRecordingClicked');
+  }
+
   //for clipped list session
-  clipedLastSecond(String filepath) {
-    clippedSessionList.add(filepath);
+  clipedLastSecond(String filepath) async {
+    final uint8list = await VideoThumbnail.thumbnailData(
+      video: filepath,
+      imageFormat: ImageFormat.JPEG,
+      quality: 100,
+    );
+    if (uint8list != null) {
+      clippedSessionList
+          .add(VideoFileModel(videoPath: filepath, thumbnailFile: uint8list));
+      print('woooooo');
+    } else {
+      print('object');
+    }
+    notifyListeners();
+  }
+
+  updateLastSecondClipped(String filepath) async {
+    final uint8list = await VideoThumbnail.thumbnailData(
+      video: filepath,
+      imageFormat: ImageFormat.JPEG,
+      quality: 100,
+    );
+    if (uint8list != null) {
+      clippedSessionList
+          .add(VideoFileModel(videoPath: filepath, thumbnailFile: uint8list));
+      print('woooooo');
+    } else {
+      print('object');
+    }
     notifyListeners();
   }
 
@@ -105,7 +169,7 @@ class ClipController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void doMultiSelection(String clippedPath) {
+  void doMultiSelection(VideoFileModel clippedPath) {
     if (isMultiSelectionEnabled) {
       if (selectedItem.contains(clippedPath)) {
         selectedItem.remove(clippedPath);
@@ -117,6 +181,18 @@ class ClipController extends ChangeNotifier {
       //Other logic
     }
   }
+  // void doMultiSelection(String clippedPath) {
+  //   if (isMultiSelectionEnabled) {
+  //     if (selectedItem.contains(clippedPath)) {
+  //       selectedItem.remove(clippedPath);
+  //     } else {
+  //       selectedItem.add(clippedPath);
+  //     }
+  //     notifyListeners();
+  //   } else {
+  //     //Other logic
+  //   }
+  // }
 
   removeClip() {
     selectedItem.forEach((nature) {
@@ -147,7 +223,7 @@ class ClipController extends ChangeNotifier {
     // String commandToExecute = '$result -y $outputPath';
     // print(commandToExecute);
     for (int i = 0; i < selectedItem.length; i++) {
-      mergedList.add('-i ${selectedItem[i]} ');
+      mergedList.add('-i ${selectedItem[i].videoPath} ');
     }
     mergedList.add('-filter_complex ');
     mergedList.add('"');
@@ -187,4 +263,14 @@ class ClipController extends ChangeNotifier {
       }
     });
   }
+}
+
+class VideoFileModel {
+  final String videoPath;
+  final Uint8List thumbnailFile;
+
+  VideoFileModel({
+    required this.videoPath,
+    required this.thumbnailFile,
+  });
 }

@@ -19,7 +19,8 @@ Future<void> main() async {
   }
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-    // DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
   ]);
   // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
   //   SystemUiOverlay.bottom,
@@ -58,6 +59,21 @@ class MyApp extends StatelessWidget {
         // theme: ThemeData(fontFamily: 'SF-Pro'),
         home: const CameraPage(),
         builder: EasyLoading.init(),
+      ),
+    );
+  }
+}
+
+class MyWidget extends StatelessWidget {
+  const MyWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final isLandscape = MediaQuery.of(context).orientation ==
+        Orientation.landscape; // check if the orientation is landscape
+    return Scaffold(
+      body: Center(
+        child: isLandscape ? Text('data') : Text('potarait'),
       ),
     );
   }

@@ -1,15 +1,14 @@
+import 'package:clip_test/helpers/editor/domain/bloc/controller.dart';
 import 'package:flutter/material.dart';
-
-import '../bloc/controller.dart';
 
 class TransformData {
   TransformData({
-    required this.scale,
-    required this.rotation,
-    required this.translate,
+    this.scale = 1.0,
+    this.rotation = 0.0,
+    this.translate = Offset.zero,
   });
-  double rotation, scale;
-  Offset translate;
+  final double rotation, scale;
+  final Offset translate;
 
   factory TransformData.fromRect(
     Rect rect,
