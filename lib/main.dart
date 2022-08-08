@@ -1,4 +1,6 @@
 import 'package:camera/camera.dart';
+import 'package:clip_test/controller/camera_con.dart';
+import 'package:clip_test/controller/rotate_controller.dart';
 import 'package:clip_test/screens/homepage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,12 +21,10 @@ Future<void> main() async {
   }
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
   ]);
-  // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
-  //   SystemUiOverlay.bottom,
-  // ]);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
+    SystemUiOverlay.bottom,
+  ]);
 
   runApp(const MyApp());
 }
@@ -40,6 +40,12 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (context) => ClipController(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => RotateController(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => CameraProviderController(),
         )
       ],
       child: CupertinoApp(
@@ -59,21 +65,6 @@ class MyApp extends StatelessWidget {
         // theme: ThemeData(fontFamily: 'SF-Pro'),
         home: const CameraPage(),
         builder: EasyLoading.init(),
-      ),
-    );
-  }
-}
-
-class MyWidget extends StatelessWidget {
-  const MyWidget({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final isLandscape = MediaQuery.of(context).orientation ==
-        Orientation.landscape; // check if the orientation is landscape
-    return Scaffold(
-      body: Center(
-        child: isLandscape ? Text('data') : Text('potarait'),
       ),
     );
   }

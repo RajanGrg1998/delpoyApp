@@ -6,8 +6,8 @@ import 'package:provider/provider.dart';
 import '../../../controller/clip_controller.dart';
 import 'editor/finale.dart';
 
-class IOSEditClipPage extends StatelessWidget {
-  const IOSEditClipPage({Key? key}) : super(key: key);
+class DemoIOSEditClipPage extends StatelessWidget {
+  const DemoIOSEditClipPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class IOSEditClipPage extends StatelessWidget {
                       ),
                       onPressed: () {
                         clipCon.mergeSelectedClips();
-                        // clipCon.selectedItem.clear();
+                        //clipCon.selectedItem.clear();
                         clipCon.isMultiSelectionValue(false);
                       },
                     ),
@@ -223,7 +223,6 @@ class Rotation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var clupCon = Provider.of<ClipController>(context);
-
     return RotatedBox(
       quarterTurns: clupCon.isLandscapeRecordingClicked ? 2 : 0,
       child: Image.memory(

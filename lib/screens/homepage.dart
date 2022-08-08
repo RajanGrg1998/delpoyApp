@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:clip_test/screens/demoeditpage.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/foundation.dart';
@@ -17,7 +18,6 @@ import '../../main.dart';
 import '../controller/clip_controller.dart';
 import '../controller/lastclip_controller.dart';
 import '../utils/constant.dart';
-import 'ios_editclips_page.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({Key? key}) : super(key: key);
@@ -253,7 +253,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => IOSEditClipPage(),
+                                    builder: (context) => DemoIOSEditClipPage(),
                                   ),
                                 );
                               },

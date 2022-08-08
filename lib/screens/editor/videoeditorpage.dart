@@ -46,13 +46,13 @@ class _VideoEditorState extends State<VideoEditor> {
       onCompleted: (file) async {
         // _isExporting.value = false;
         if (!mounted) return;
-        if (file != null) {
-          Provider.of<ClipController>(context, listen: false)
-              .addTrimmedSession(file.path);
-          EasyLoading.showSuccess('Video Trimmed!');
 
-          EasyLoading.dismiss();
-        } else {}
+        Provider.of<ClipController>(context, listen: false)
+            .addTrimmedSession(file.path);
+        EasyLoading.showSuccess('Video Trimmed!');
+
+        EasyLoading.dismiss();
+
         Navigator.pop(context);
       },
     );

@@ -126,3 +126,37 @@ bool startPressed = true;
 bool stopPressed = true;
 bool resetPressed = true;
 final dur = const Duration(seconds: 1);
+
+showAlertDialog(
+  BuildContext context,
+  String title,
+  String content,
+  void Function()? yes,
+  void Function()? no,
+) {
+  // set up the buttons
+
+  // set up the AlertDialog
+  AlertDialog alert = AlertDialog(
+    title: Text(title),
+    content: Text(content),
+    actions: [
+      TextButton(
+        child: const Text("Yes"),
+        onPressed: yes,
+      ),
+      TextButton(
+        child: const Text("No"),
+        onPressed: no,
+      ),
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}

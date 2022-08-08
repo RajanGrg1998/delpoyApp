@@ -370,7 +370,6 @@ class _CropGridViewerState extends State<CropGridViewer> {
                       ? MediaQuery.of(context).size.width -
                           widget.horizontalMargin
                       : Size.infinite.height),
-              // TODO: on rotation 90 or 270 the scale to big so some of the crop area is hidden [#78]
               child: CropTransform(
                   transform: transform,
                   child: VideoViewer(

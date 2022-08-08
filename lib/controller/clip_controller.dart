@@ -29,6 +29,15 @@ class ClipController extends ChangeNotifier {
 
   bool isCameraLoadingIndicator = false;
 
+  bool isLandscapeRecordingStartedLeft = false;
+  bool isLandscapeRecordingStartedRight = false;
+  bool isPotraitRecordingStarted = false;
+
+  leftLadnscapeChnage(bool va) {
+    isLandscapeRecordingStartedLeft = va;
+    notifyListeners();
+  }
+
   changeCameraLoadingIndicatodValue(bool value) {
     isCameraLoadingIndicator = value;
     notifyListeners();
@@ -268,9 +277,11 @@ class ClipController extends ChangeNotifier {
 class VideoFileModel {
   final String videoPath;
   final Uint8List thumbnailFile;
+  final bool isNewThumnailCreated;
 
   VideoFileModel({
     required this.videoPath,
     required this.thumbnailFile,
+    this.isNewThumnailCreated = false,
   });
 }
