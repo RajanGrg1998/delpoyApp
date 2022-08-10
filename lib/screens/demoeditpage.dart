@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 import '../../../controller/clip_controller.dart';
 import 'editor/finale.dart';
 
@@ -150,15 +151,7 @@ class DemoIOSEditClipPage extends StatelessWidget {
                     },
               child: Stack(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: ClipRRect(
-                        borderRadius: BorderRadius.circular(5),
-                        child: Rotation(
-                            videoFileModel: clipCon.clippedSessionList[index])),
-                  ),
+                  DemoDDD(path: clipCon.clippedSessionList[index].videoPath),
                   Padding(
                     padding: const EdgeInsets.only(right: 5.0, top: 5.0),
                     child: Align(
@@ -179,6 +172,20 @@ class DemoIOSEditClipPage extends StatelessWidget {
                   ),
                 ],
               ),
+              // child: Stack(
+              //   children: [
+              //     Container(
+              //       decoration: BoxDecoration(
+              //         borderRadius: BorderRadius.circular(5),
+              //       ),
+              //       child: ClipRRect(
+              //           borderRadius: BorderRadius.circular(5),
+              //           child: Rotation(
+              //               videoFileModel: clipCon.clippedSessionList[index])),
+              //     ),
+
+              //   ],
+              // ),
             ),
           );
         },
@@ -226,7 +233,7 @@ class Rotation extends StatelessWidget {
     return RotatedBox(
       quarterTurns: clupCon.isLandscapeRecordingClicked ? 2 : 0,
       child: Image.memory(
-        videoFileModel.thumbnailFile,
+        videoFileModel.thumbnailFile!,
         filterQuality: FilterQuality.high,
         width: double.infinity,
         height: double.infinity,
@@ -234,5 +241,46 @@ class Rotation extends StatelessWidget {
         fit: BoxFit.cover,
       ),
     );
+  }
+}
+
+// ksdkjhsadkj
+
+class DemoDDD extends StatefulWidget {
+  const DemoDDD({Key? key, required this.path}) : super(key: key);
+  final String path;
+
+  @override
+  State<DemoDDD> createState() => _DemoDDDState();
+}
+
+class _DemoDDDState extends State<DemoDDD> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.file(File(widget.path))
+      ..initialize().then((_) {
+        setState(() {}); //when your thumbnail will show.
+      });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _controller.value.isInitialized
+        ? Container(
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(5)),
+            child: ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: VideoPlayer(_controller)),
+          )
+        : CircularProgressIndicator();
   }
 }

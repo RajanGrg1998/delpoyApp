@@ -51,18 +51,12 @@ class _FinalVideoEditorState extends State<FinalVideoEditor> {
         // _isExporting.value = false;
         // await GallerySaver.saveVideo(file.path);
         if (!mounted) return;
-        final uint8list = await VideoThumbnail.thumbnailData(
-          video: file.path,
-          imageFormat: ImageFormat.JPEG,
-          quality: 100,
-        );
-        if (clipController.isRotationVideoEditorPressed && uint8list != null) {
+
+        if (clipController.isRotationVideoEditorPressed) {
           clipController.addTrimmedSession(file.path);
           clipController.clippedSessionList.removeAt(widget.index);
           clipController.clippedSessionList.insert(
-              widget.index,
-              VideoFileModel(
-                  videoPath: widget.file.path, thumbnailFile: uint8list));
+              widget.index, VideoFileModel(videoPath: widget.file.path));
           clipController.changeRotationButtonPressed(false);
         } else {
           clipController.addTrimmedSession(file.path);

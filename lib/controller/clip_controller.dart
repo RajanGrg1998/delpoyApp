@@ -65,18 +65,11 @@ class ClipController extends ChangeNotifier {
 
   //for clipped list session
   clipedLastSecond(String filepath) async {
-    final uint8list = await VideoThumbnail.thumbnailData(
-      video: filepath,
-      imageFormat: ImageFormat.JPEG,
-      quality: 100,
-    );
-    if (uint8list != null) {
-      clippedSessionList
-          .add(VideoFileModel(videoPath: filepath, thumbnailFile: uint8list));
-      print('woooooo');
-    } else {
-      print('object');
-    }
+    clippedSessionList.add(VideoFileModel(
+      videoPath: filepath,
+    ));
+    print('woooooo');
+
     notifyListeners();
   }
 
@@ -276,12 +269,12 @@ class ClipController extends ChangeNotifier {
 
 class VideoFileModel {
   final String videoPath;
-  final Uint8List thumbnailFile;
+  final Uint8List? thumbnailFile;
   final bool isNewThumnailCreated;
 
   VideoFileModel({
     required this.videoPath,
-    required this.thumbnailFile,
+    this.thumbnailFile,
     this.isNewThumnailCreated = false,
   });
 }

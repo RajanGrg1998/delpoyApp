@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:clip_test/screens/demoeditpage.dart';
+import 'package:clip_test/screens/ios_editclips_page.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/foundation.dart';
@@ -385,8 +386,13 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                       label: ':10',
                       onPressed: () async {
                         if (isRecordingInProgress) {
-                          XFile? rawVideo = await stopVideoRecording();
-                          File videoFile = File(rawVideo!.path);
+                          // XFile? rawVideo = await stopVideoRecording();
+                          XFile eafile =
+                              await _cameraController!.stopVideoRecording();
+                          setState(() {
+                            isRecordingInProgress = false;
+                          });
+                          File videoFile = File(eafile.path);
                           int currentUnix =
                               DateTime.now().millisecondsSinceEpoch;
 
@@ -507,6 +513,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                         if (isRecordingInProgress) {
                           XFile? rawVideo = await stopVideoRecording();
                           File videoFile = File(rawVideo!.path);
+
                           int currentUnix =
                               DateTime.now().millisecondsSinceEpoch;
 

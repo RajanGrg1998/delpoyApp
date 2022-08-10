@@ -227,7 +227,7 @@ class Rotation extends StatelessWidget {
     return RotatedBox(
       quarterTurns: clupCon.isLandscapeRecordingClicked ? 2 : 0,
       child: Image.memory(
-        videoFileModel.thumbnailFile,
+        videoFileModel.thumbnailFile!,
         filterQuality: FilterQuality.high,
         width: double.infinity,
         height: double.infinity,
