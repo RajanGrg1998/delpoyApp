@@ -66,6 +66,7 @@ class ClipController extends ChangeNotifier {
   //for clipped list session
   clipedLastSecond(String filepath) async {
     final uint8list = await VideoThumbnail.thumbnailData(
+      timeMs: 100,
       video: filepath,
       imageFormat: ImageFormat.JPEG,
       quality: 100,
