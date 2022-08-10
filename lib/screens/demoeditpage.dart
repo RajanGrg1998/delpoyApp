@@ -149,9 +149,49 @@ class DemoIOSEditClipPage extends StatelessWidget {
                           ));
                       //  clipCon.rotateVideo(clipCon.clippedSessionList[index].videoPath);
                     },
+              // child: Stack(
+              //   children: [
+              //     // DemoDDD(path: clipCon.clippedSessionList[index].videoPath),
+              //     Container(
+              //       decoration: BoxDecoration(
+              //         borderRadius: BorderRadius.circular(5),
+              //       ),
+              //       child: ClipRRect(
+              //           borderRadius: BorderRadius.circular(5),
+              //           child: Rotation(
+              //               videoFileModel: clipCon.clippedSessionList[index])),
+              //     ),
+              //     Padding(
+              //       padding: const EdgeInsets.only(right: 5.0, top: 5.0),
+              //       child: Align(
+              //         alignment: Alignment.topRight,
+              //         child: Visibility(
+              //           visible: clipCon.isMultiSelectionEnabled &&
+              //               clipCon.selectedItem.isNotEmpty,
+              //           child: Icon(
+              //             clipCon.selectedItem
+              //                     .contains(clipCon.clippedSessionList[index])
+              //                 ? Icons.check_circle
+              //                 : Icons.radio_button_unchecked,
+              //             size: 25,
+              //             color: Colors.white,
+              //           ),
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
               child: Stack(
                 children: [
-                  DemoDDD(path: clipCon.clippedSessionList[index].videoPath),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: ClipRRect(
+                        borderRadius: BorderRadius.circular(5),
+                        child: Rotation(
+                            videoFileModel: clipCon.clippedSessionList[index])),
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(right: 5.0, top: 5.0),
                     child: Align(
@@ -172,20 +212,6 @@ class DemoIOSEditClipPage extends StatelessWidget {
                   ),
                 ],
               ),
-              // child: Stack(
-              //   children: [
-              //     Container(
-              //       decoration: BoxDecoration(
-              //         borderRadius: BorderRadius.circular(5),
-              //       ),
-              //       child: ClipRRect(
-              //           borderRadius: BorderRadius.circular(5),
-              //           child: Rotation(
-              //               videoFileModel: clipCon.clippedSessionList[index])),
-              //     ),
-
-              //   ],
-              // ),
             ),
           );
         },
@@ -233,7 +259,7 @@ class Rotation extends StatelessWidget {
     return RotatedBox(
       quarterTurns: clupCon.isLandscapeRecordingClicked ? 2 : 0,
       child: Image.memory(
-        videoFileModel.thumbnailFile!,
+        videoFileModel.thumbnailFile,
         filterQuality: FilterQuality.high,
         width: double.infinity,
         height: double.infinity,
@@ -276,7 +302,10 @@ class _DemoDDDState extends State<DemoDDD> {
   Widget build(BuildContext context) {
     return _controller.value.isInitialized
         ? Container(
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(5)),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(5),
+            ),
             child: ClipRRect(
                 borderRadius: BorderRadius.circular(5),
                 child: VideoPlayer(_controller)),
