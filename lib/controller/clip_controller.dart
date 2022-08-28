@@ -13,6 +13,8 @@ class ClipController extends ChangeNotifier {
   //camera
   List<VideoFileModel> clippedSessionList = [];
 
+  List<String> fullSessionList = [];
+
   List<String> timmedSessionList = [];
 
   List<VideoFileModel> selectedItem = [];
@@ -61,6 +63,12 @@ class ClipController extends ChangeNotifier {
     isPotraitRecordingClicked = value;
     notifyListeners();
     print('object: $isLandscapeRecordingClicked');
+  }
+
+  //for clipped list session
+  addFullSessiom(String filepath) async {
+    fullSessionList.add(filepath);
+    notifyListeners();
   }
 
   //for clipped list session
