@@ -120,7 +120,8 @@ class DemoIOSEditClipPage extends StatelessWidget {
                     ),
                   )
                 : Container(),
-            !clipCon.isMultiSelectionEnabled
+            !clipCon.isMultiSelectionEnabled &&
+                    clipCon.timmedSessionList.isEmpty
                 ? CupertinoButton(
                     padding: EdgeInsets.only(right: 15),
                     child: Text(
@@ -168,10 +169,10 @@ class DemoIOSEditClipPage extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.all(5.0),
             child: GestureDetector(
-              onLongPress: () {
-                clipCon.isMultiSelectionValue(true);
-                clipCon.doMultiSelection(clipCon.clippedSessionList[index]);
-              },
+              // onLongPress: () {
+              //   clipCon.isMultiSelectionValue(true);
+              //   clipCon.doMultiSelection(clipCon.clippedSessionList[index]);
+              // },
               onTap: clipCon.isMultiSelectionEnabled
                   ? () {
                       clipCon
