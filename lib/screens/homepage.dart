@@ -178,14 +178,18 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
             style: TextStyle(fontSize: 14, color: CupertinoColors.white),
           ),
           leading: CupertinoButton(
-            onPressed: () {
-              onNewCameraSelected(
-                cameras[isRearCameraSelected ? 1 : 0],
-              );
-              setState(() {
-                isRearCameraSelected = !isRearCameraSelected;
-              });
-            },
+            onPressed: isRecordingInProgress
+                ? () {
+                    print('not available while recording');
+                  }
+                : () {
+                    onNewCameraSelected(
+                      cameras[isRearCameraSelected ? 1 : 0],
+                    );
+                    setState(() {
+                      isRearCameraSelected = !isRearCameraSelected;
+                    });
+                  },
             child: Icon(
               CupertinoIcons.camera_rotate,
               size: 20,
