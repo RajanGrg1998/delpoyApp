@@ -34,32 +34,72 @@ class DemoIOSEditClipPage extends StatelessWidget {
                       clipCon.isMultiSelectionValue(false);
                     },
                   )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(width: 2),
-                      GestureDetector(
-                        onTap: () {
-                          _showMyDialog(context);
-                        },
-                        child: Icon(
+                : GestureDetector(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(
                           CupertinoIcons.back,
                           color: CupertinoColors.white,
                         ),
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        'Edit Clips',
-                        style: TextStyle(
-                            color: CupertinoColors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold),
-                      )
-                    ],
+                        SizedBox(width: 5),
+                        Text(
+                          'Edit Clips',
+                          style: TextStyle(
+                              color: CupertinoColors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
+                    onTap: () {
+                      _showMyDialog(context);
+                    },
                   ),
+        // : Row(
+        //     mainAxisAlignment: MainAxisAlignment.start,
+        //     children: [
+        //       SizedBox(width: 2),
+        //       GestureDetector(
+        //         onTap: () {
+        //           _showMyDialog(context);
+        //         },
+        //         child: Icon(
+        //           CupertinoIcons.back,
+        //           color: CupertinoColors.white,
+        //         ),
+        //       ),
+        // SizedBox(width: 5),
+        // Text(
+        //   'Edit Clips',
+        //   style: TextStyle(
+        //       color: CupertinoColors.white,
+        //       fontSize: 15,
+        //       fontWeight: FontWeight.bold),
+        // )
+        //     ],
+        //   ),
         trailing: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            clipCon.isMultiSelectionEnabled
+                ? Visibility(
+                    visible: clipCon.selectedItem.isNotEmpty,
+                    child: CupertinoButton(
+                      padding: EdgeInsets.only(right: 15),
+                      child: Text(
+                        'Delete',
+                        style: TextStyle(
+                          color: CupertinoColors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                      onPressed: () {
+                        clipCon.removeClip();
+                      },
+                    ),
+                  )
+                : Container(),
             clipCon.isMultiSelectionEnabled
                 ? Visibility(
                     visible: clipCon.selectedItem.isNotEmpty,
@@ -80,31 +120,30 @@ class DemoIOSEditClipPage extends StatelessWidget {
                     ),
                   )
                 : Container(),
-            clipCon.isMultiSelectionEnabled
-                ? Visibility(
-                    visible: clipCon.selectedItem.isNotEmpty,
-                    child: CupertinoButton(
-                      padding: EdgeInsets.only(right: 15),
-                      child: Text(
-                        'Delete Clips',
-                        style: TextStyle(
-                          color: CupertinoColors.white,
-                          fontSize: 15,
-                        ),
+            !clipCon.isMultiSelectionEnabled
+                ? CupertinoButton(
+                    padding: EdgeInsets.only(right: 15),
+                    child: Text(
+                      'Merge Clips',
+                      style: TextStyle(
+                        color: CupertinoColors.white,
+                        fontSize: 15,
                       ),
-                      onPressed: () {
-                        clipCon.removeClip();
-                      },
                     ),
+                    onPressed: () {
+                      clipCon.isMultiSelectionValue(true);
+                      clipCon
+                          .doMultiSelection(clipCon.clippedSessionList.first);
+                    },
                   )
-                : Container(),
+                : SizedBox.shrink(),
             clipCon.timmedSessionList.isNotEmpty
                 ? Visibility(
                     visible: clipCon.isMultiSelectionEnabled == false,
                     child: CupertinoButton(
                       padding: EdgeInsets.only(right: 15),
                       child: Text(
-                        'Merge',
+                        'Merge Edits',
                         style: TextStyle(
                           color: CupertinoColors.white,
                           fontSize: 15,
