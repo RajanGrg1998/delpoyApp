@@ -36,7 +36,6 @@ dependencies:
   flutter_easyloading: ^3.0.5
   gallery_saver: ^2.3.2
   helpers: null
-  image_picker: ^0.8.5+3
   intl: ^0.17.0
   path: null
   path_provider: ^2.0.9
