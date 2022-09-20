@@ -391,12 +391,9 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                       onPressed: () async {
                         if (isRecordingInProgress) {
                           // XFile? rawVideo = await stopVideoRecording();
-                          XFile eafile =
-                              await _cameraController!.stopVideoRecording();
-                          setState(() {
-                            isRecordingInProgress = false;
-                          });
-                          File videoFile = File(eafile.path);
+                          XFile? rawVideo = await stopVideoRecording();
+                          EasyLoading.show(status: 'Video Cliping...');
+                          File videoFile = File(rawVideo!.path);
                           int currentUnix =
                               DateTime.now().millisecondsSinceEpoch;
 
@@ -421,10 +418,12 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                               endValue: duration,
                               onSave: (outcome) async {
                                 clipCon.clipedLastSecond(outcome);
-                                // //await GallerySaver.saveVideo(outcome);
+                                //await GallerySaver.saveVideo(outcome);
+                                EasyLoading.showSuccess('Video Clipped!');
                               },
                               videoFile: File(_videoFile!.path));
                           await controller.dispose();
+                          EasyLoading.dismiss();
                           await startVideoRecording();
                         } else {
                           print('asd');
