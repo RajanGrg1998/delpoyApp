@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:clip_test/screens/demoeditpage.dart';
 import 'package:clip_test/screens/ios_editclips_page.dart';
+import 'package:clip_test/screens/testing/testthumb_screen.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/foundation.dart';
@@ -258,7 +259,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => DemoIOSEditClipPage(),
+                                    builder: (context) => TestThumbScreen(),
                                   ),
                                 );
                               },

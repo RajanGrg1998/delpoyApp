@@ -223,15 +223,15 @@ class DemoIOSEditClipPage extends StatelessWidget {
               // ),
               child: Stack(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: ClipRRect(
-                        borderRadius: BorderRadius.circular(5),
-                        child: Rotation(
-                            videoFileModel: clipCon.clippedSessionList[index])),
-                  ),
+                  // Container(
+                  //   decoration: BoxDecoration(
+                  //     borderRadius: BorderRadius.circular(5),
+                  //   ),
+                  //   child: ClipRRect(
+                  //       borderRadius: BorderRadius.circular(5),
+                  //       child: Rotation(
+                  //           videoFileModel: clipCon.clippedSessionList[index])),
+                  // ),
                   Padding(
                     padding: const EdgeInsets.only(right: 5.0, top: 5.0),
                     child: Align(
@@ -289,26 +289,26 @@ class DemoIOSEditClipPage extends StatelessWidget {
   }
 }
 
-class Rotation extends StatelessWidget {
-  const Rotation({Key? key, required this.videoFileModel}) : super(key: key);
-  final VideoFileModel videoFileModel;
+// class Rotation extends StatelessWidget {
+//   const Rotation({Key? key, required this.videoFileModel}) : super(key: key);
+//   final VideoFileModel videoFileModel;
 
-  @override
-  Widget build(BuildContext context) {
-    var clupCon = Provider.of<ClipController>(context);
-    return RotatedBox(
-      quarterTurns: clupCon.isLandscapeRecordingClicked ? 2 : 0,
-      child: Image.memory(
-        videoFileModel.thumbnailFile,
-        filterQuality: FilterQuality.high,
-        width: double.infinity,
-        height: double.infinity,
-        alignment: Alignment.center,
-        fit: BoxFit.cover,
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     var clupCon = Provider.of<ClipController>(context);
+//     return RotatedBox(
+//       quarterTurns: clupCon.isLandscapeRecordingClicked ? 2 : 0,
+//       child: Image.memory(
+//         videoFileModel.thumbnailFile,
+//         filterQuality: FilterQuality.high,
+//         width: double.infinity,
+//         height: double.infinity,
+//         alignment: Alignment.center,
+//         fit: BoxFit.cover,
+//       ),
+//     );
+//   }
+// }
 
 // ksdkjhsadkj
 

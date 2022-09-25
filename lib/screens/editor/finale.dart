@@ -62,7 +62,9 @@ class _FinalVideoEditorState extends State<FinalVideoEditor> {
           clipController.clippedSessionList.insert(
               widget.index,
               VideoFileModel(
-                  videoPath: widget.file.path, thumbnailFile: uint8list));
+                videoPath: widget.file.path,
+                // thumbnailFile: uint8list,
+              ));
           clipController.changeRotationButtonPressed(false);
         } else {
           clipController.addTrimmedSession(file.path);
