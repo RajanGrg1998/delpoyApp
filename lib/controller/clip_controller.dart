@@ -143,7 +143,7 @@ class ClipController extends ChangeNotifier {
     mergedList.add('"');
     for (int i = 0; i < timmedSessionList.length; i++) {
       mergedList.add(
-          '[$i:v]scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:-1:-1,setsar=1,fps=30 [v$i]; ');
+          '[$i:v]scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:-1:-1,setsar=1,fps=60 [v$i]; ');
     }
     for (int i = 0; i < timmedSessionList.length; i++) {
       mergedList.add('[v$i][$i:a] ');
@@ -253,7 +253,7 @@ class ClipController extends ChangeNotifier {
     mergedList.add('"');
     for (int i = 0; i < selectedItem.length; i++) {
       mergedList.add(
-          '[$i:v]scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:-1:-1,setsar=1,fps=30 [v$i]; ');
+          '[$i:v]scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:-1:-1,setsar=1,fps=60 [v$i]; ');
     }
     for (int i = 0; i < selectedItem.length; i++) {
       mergedList.add('[v$i][$i:a] ');
