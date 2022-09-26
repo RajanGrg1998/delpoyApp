@@ -93,10 +93,11 @@ class CustomTimeButton extends StatelessWidget {
   }
 }
 
-void showInSnackBar(String message) {
-  // ignore: deprecated_member_use
-  scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(message)));
-}
+// void showInSnackBar(String message) {
+//   // ignore: deprecated_member_use
+
+//   scaffoldKey.currentState?. showSnackBar(SnackBar(content: Text(message)));
+// }
 
 void logError(String code, String? message) {
   if (message != null) {
@@ -113,7 +114,7 @@ void resetCameraValues() async {
 
 void showCameraException(CameraException e) {
   logError(e.code, e.description);
-  showInSnackBar('Error: ${e.code}\n${e.description}');
+  // showInSnackBar('Error: ${e.code}\n${e.description}');
 }
 
 DateTime now = DateTime.now();
@@ -141,11 +142,11 @@ showAlertDialog(
     title: Text(title),
     content: Text(content),
     actions: [
-      TextButton(
+      ElevatedButton(
         child: const Text("Yes"),
         onPressed: yes,
       ),
-      TextButton(
+      ElevatedButton(
         child: const Text("No"),
         onPressed: no,
       ),

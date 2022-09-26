@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:helpers/helpers/transition.dart';
 import 'package:provider/provider.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
+
 
 class FinalVideoEditor extends StatefulWidget {
   const FinalVideoEditor({Key? key, required this.file, required this.index})
@@ -51,24 +51,24 @@ class _FinalVideoEditorState extends State<FinalVideoEditor> {
         // _isExporting.value = false;
         // await GallerySaver.saveVideo(file.path);
         if (!mounted) return;
-        final uint8list = await VideoThumbnail.thumbnailData(
-          video: file.path,
-          imageFormat: ImageFormat.JPEG,
-          quality: 100,
-        );
-        if (clipController.isRotationVideoEditorPressed && uint8list != null) {
+        // final uint8list = await VideoThumbnail.thumbnailData(
+        //   video: file.path,
+        //   imageFormat: ImageFormat.JPEG,
+        //   quality: 100,
+        // );
+        // if (clipController.isRotationVideoEditorPressed && uint8list != null) {
+        //   clipController.addTrimmedSession(file.path);
+        //   clipController.clippedSessionList.removeAt(widget.index);
+        //   clipController.clippedSessionList.insert(
+        //       widget.index,
+        //       VideoFileModel(
+        //         videoPath: widget.file.path,
+        //         // thumbnailFile: uint8list,
+        //       ));
+        //   clipController.changeRotationButtonPressed(false);
+        // } else {
           clipController.addTrimmedSession(file.path);
-          clipController.clippedSessionList.removeAt(widget.index);
-          clipController.clippedSessionList.insert(
-              widget.index,
-              VideoFileModel(
-                videoPath: widget.file.path,
-                // thumbnailFile: uint8list,
-              ));
-          clipController.changeRotationButtonPressed(false);
-        } else {
-          clipController.addTrimmedSession(file.path);
-        }
+        // }
 
         EasyLoading.showSuccess('Video Trimmed!');
 

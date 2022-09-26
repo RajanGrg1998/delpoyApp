@@ -3,9 +3,6 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:clip_test/screens/demoeditpage.dart';
-import 'package:clip_test/screens/ios_editclips_page.dart';
-import 'package:clip_test/screens/testing/dk.dart';
-import 'package:clip_test/screens/testing/testthumb_screen.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/foundation.dart';
@@ -260,7 +257,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => DEMooooo(),
+                                    builder: (context) => DemoIOSEditClipPage(),
                                   ),
                                 );
                               },
@@ -291,7 +288,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                                 child: RawMaterialButton(
                                   onPressed: () async {
                                     await pauseVideoRecording();
-                                    showInSnackBar('Session Resume');
+                                    //     showInSnackBar('Session Resume');
                                   },
                                   elevation: 2.0,
                                   fillColor: Colors.white,
@@ -314,7 +311,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                                 child: RawMaterialButton(
                                   onPressed: () async {
                                     await resumeVideoRecording();
-                                    showInSnackBar('Session Resume');
+                                    //       showInSnackBar('Session Resume');
                                   },
                                   elevation: 2.0,
                                   fillColor: Colors.white,
@@ -437,6 +434,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                       onPressed: () async {
                         if (isRecordingInProgress) {
                           XFile? rawVideo = await stopVideoRecording();
+                          EasyLoading.show(status: 'Video Cliping...');
                           File videoFile = File(rawVideo!.path);
                           int currentUnix =
                               DateTime.now().millisecondsSinceEpoch;
@@ -462,10 +460,13 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                               endValue: duration,
                               onSave: (outcome) async {
                                 clipCon.clipedLastSecond(outcome);
+                                EasyLoading.showSuccess('Video Clipped!');
+
                                 //await GallerySaver.saveVideo(outcome);
                               },
                               videoFile: File(_videoFile!.path));
                           await controller.dispose();
+                          EasyLoading.dismiss();
                           await startVideoRecording();
                         } else {
                           print('asd');
@@ -477,6 +478,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                       onPressed: () async {
                         if (isRecordingInProgress) {
                           XFile? rawVideo = await stopVideoRecording();
+                          EasyLoading.show(status: 'Video Cliping...');
                           File videoFile = File(rawVideo!.path);
                           int currentUnix =
                               DateTime.now().millisecondsSinceEpoch;
@@ -502,10 +504,12 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                               endValue: duration,
                               onSave: (outcome) async {
                                 clipCon.clipedLastSecond(outcome);
+                                EasyLoading.showSuccess('Video Clipped!');
                                 //await GallerySaver.saveVideo(outcome);
                               },
                               videoFile: File(_videoFile!.path));
                           await controller.dispose();
+                          EasyLoading.dismiss();
                           await startVideoRecording();
                         } else {
                           print('asd');
@@ -517,6 +521,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                       onPressed: () async {
                         if (isRecordingInProgress) {
                           XFile? rawVideo = await stopVideoRecording();
+                          EasyLoading.show(status: 'Video Cliping...');
                           File videoFile = File(rawVideo!.path);
 
                           int currentUnix =
@@ -543,10 +548,12 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                               endValue: duration,
                               onSave: (outcome) async {
                                 clipCon.clipedLastSecond(outcome);
+                                EasyLoading.showSuccess('Video Clipped!');
                                 //await GallerySaver.saveVideo(outcome);
                               },
                               videoFile: File(_videoFile!.path));
                           await controller.dispose();
+                          EasyLoading.dismiss();
                           await startVideoRecording();
                         } else {
                           print('asd');
@@ -724,7 +731,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
               onPressed: () async {
                 EasyLoading.show(status: 'Session Saving...');
                 await GallerySaver.saveVideo(path);
-                showInSnackBar('Recording saved to gallery');
+                //  showInSnackBar('Recording saved to gallery');
                 EasyLoading.showSuccess('Session saved to Gallery');
                 EasyLoading.dismiss();
                 Navigator.pop(context);

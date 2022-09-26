@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:clip_test/screens/testing/testthumb_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -232,6 +233,7 @@ class DemoIOSEditClipPage extends StatelessWidget {
                   //       child: Rotation(
                   //           videoFileModel: clipCon.clippedSessionList[index])),
                   // ),
+                  VideoOSIOS(path: clipCon.clippedSessionList[index].videoPath),
                   Padding(
                     padding: const EdgeInsets.only(right: 5.0, top: 5.0),
                     child: Align(
