@@ -20,8 +20,8 @@ class _VideoOSIOSState extends State<VideoOSIOS> {
       ..initialize().then((value) {
         controller.play();
         controller.setVolume(0);
-        // Future.delayed(Duration(seconds: 2))
-        //     .then((value) => controller.pause());
+        Future.delayed(Duration(seconds: 2))
+            .then((value) => controller.pause());
 
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
       });
