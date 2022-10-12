@@ -7,6 +7,9 @@ import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ClipController extends ChangeNotifier {
+
+
+
   //camera
   List<VideoFileModel> clippedSessionList = [];
 

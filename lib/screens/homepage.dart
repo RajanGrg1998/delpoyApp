@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
@@ -39,6 +40,8 @@ void logError(String code, String? message) {
 class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   CameraController? _cameraController;
   VideoPlayerController? videoController;
+
+  bool isLandscape = false;
 
   String stopTimeDisplay = "00:00:00";
   var swatch = Stopwatch();
@@ -117,7 +120,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
     try {
       await cameraController.initialize();
-      await cameraController.lockCaptureOrientation();
+      await cameraController.unlockCaptureOrientation();
       await cameraController.prepareForVideoRecording();
       await Future.wait(<Future<Object?>>[
         // The exposure mode is currently not supported on the web.
@@ -148,6 +151,8 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     var clipCon = Provider.of<ClipController>(context);
+    var oreintation = MediaQuery.of(context).orientation;
+
     if (isLoading) {
       return Center(
         child: CircularProgressIndicator(),
@@ -199,17 +204,25 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
         backgroundColor: CupertinoColors.black,
         child: Stack(
           children: [
-            Platform.isIOS
+            // Platform.isIOS
+            //     ? Center(
+            //         child: cameraPreview(),
+            //       )
+            //     : cameraPreview(),
+
+            (oreintation == Orientation.landscape)
                 ? Center(
-                    child: cameraPreview(),
-                  )
+                    child: AspectRatio(
+                        aspectRatio: 18 / 9, child: cameraPreview()))
                 : cameraPreview(),
+
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  //stop recording
                   !isRecordButtonVissible
                       ? Padding(
                           padding: const EdgeInsets.only(
@@ -224,6 +237,12 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                                 });
                                 resetWatch();
                                 XFile? rawVideo = await stopVideoRecording();
+                                SystemChrome.setPreferredOrientations([
+                                  DeviceOrientation.portraitUp,
+                                  DeviceOrientation.portraitDown,
+                                  DeviceOrientation.landscapeLeft,
+                                  DeviceOrientation.landscapeRight,
+                                ]);
                                 File videoFile = File(rawVideo!.path);
                                 int currentUnix =
                                     DateTime.now().millisecondsSinceEpoch;
@@ -326,7 +345,7 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                               ),
                             )
                       : SizedBox.shrink(),
-
+                  //start recording
                   isRecordButtonVissible
                       ? Padding(
                           padding: const EdgeInsets.only(
@@ -337,6 +356,16 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                             child: RawMaterialButton(
                               onPressed: () async {
                                 await startVideoRecording();
+                                if (oreintation == Orientation.landscape) {
+                                  SystemChrome.setPreferredOrientations([
+                                    DeviceOrientation.landscapeLeft,
+                                  ]);
+                                } else if (oreintation ==
+                                    Orientation.portrait) {
+                                  SystemChrome.setPreferredOrientations([
+                                    DeviceOrientation.portraitUp,
+                                  ]);
+                                }
                                 setState(() {
                                   isRecordButtonVissible = false;
                                 });
@@ -357,217 +386,464 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                 ],
               ),
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Transform.translate(
-                offset: Offset(25, -70),
-                child: Text(
-                  'Save Last',
-                  style: TextStyle(color: Colors.white),
+            if (oreintation == Orientation.landscape)
+              Align(
+                alignment: Alignment.centerRight,
+                child: Transform.translate(
+                  offset: Offset(-75, 0),
+                  child: RotatedBox(
+                    quarterTurns: 3,
+                    child: Text(
+                      'Save Last',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              )
+            else
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Transform.translate(
+                  offset: Offset(25, -70),
+                  child: Text(
+                    'Save Last',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 80, right: 25, bottom: 5),
-                child: Divider(
-                  height: 126,
-                  thickness: 2,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 10.0, bottom: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    CustomTimeButton(
-                      label: ':10',
-                      onPressed: () async {
-                        if (isRecordingInProgress) {
-                          // XFile? rawVideo = await stopVideoRecording();
-                          XFile? rawVideo = await stopVideoRecording();
-                          EasyLoading.show(status: 'Video Cliping...');
-                          File videoFile = File(rawVideo!.path);
-                          int currentUnix =
-                              DateTime.now().millisecondsSinceEpoch;
-
-                          final directory =
-                              await getApplicationDocumentsDirectory();
-
-                          String fileFormat = videoFile.path.split('.').last;
-
-                          _videoFile = await videoFile.copy(
-                            '${directory.path}/$currentUnix.$fileFormat',
-                          );
-                          print(_videoFile!.path);
-                          VideoPlayerController controller =
-                              VideoPlayerController.file(
-                                  File(_videoFile!.path));
-                          await controller.initialize();
-                          double duration =
-                              controller.value.duration.inSeconds.toDouble();
-                          double last10Sec = (duration - 10.0);
-                          LastClipController().saveLastClipVideo(
-                              startValue: last10Sec,
-                              endValue: duration,
-                              onSave: (outcome) async {
-                                clipCon.clipedLastSecond(outcome);
-                                //await GallerySaver.saveVideo(outcome);
-                                EasyLoading.showSuccess('Video Clipped!');
-                              },
-                              videoFile: File(_videoFile!.path));
-                          await controller.dispose();
-                          EasyLoading.dismiss();
-                          await startVideoRecording();
-                        } else {
-                          print('asd');
-                        }
-                      },
+            (oreintation == Orientation.landscape)
+                ? Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.only(left: 0, right: 55, bottom: 5),
+                      child: VerticalDivider(
+                        thickness: 2,
+                        color: Colors.white,
+                      ),
                     ),
-                    CustomTimeButton(
-                      label: ':30',
-                      onPressed: () async {
-                        if (isRecordingInProgress) {
-                          XFile? rawVideo = await stopVideoRecording();
-                          EasyLoading.show(status: 'Video Cliping...');
-                          File videoFile = File(rawVideo!.path);
-                          int currentUnix =
-                              DateTime.now().millisecondsSinceEpoch;
-
-                          final directory =
-                              await getApplicationDocumentsDirectory();
-
-                          String fileFormat = videoFile.path.split('.').last;
-
-                          _videoFile = await videoFile.copy(
-                            '${directory.path}/$currentUnix.$fileFormat',
-                          );
-                          print(_videoFile!.path);
-                          VideoPlayerController controller =
-                              VideoPlayerController.file(
-                                  File(_videoFile!.path));
-                          await controller.initialize();
-                          double duration =
-                              controller.value.duration.inSeconds.toDouble();
-                          double last10Sec = (duration - 30.0);
-                          LastClipController().saveLastClipVideo(
-                              startValue: last10Sec,
-                              endValue: duration,
-                              onSave: (outcome) async {
-                                clipCon.clipedLastSecond(outcome);
-                                EasyLoading.showSuccess('Video Clipped!');
-
-                                //await GallerySaver.saveVideo(outcome);
-                              },
-                              videoFile: File(_videoFile!.path));
-                          await controller.dispose();
-                          EasyLoading.dismiss();
-                          await startVideoRecording();
-                        } else {
-                          print('asd');
-                        }
-                      },
+                  )
+                : Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.only(left: 80, right: 25, bottom: 5),
+                      child: Divider(
+                        height: 126,
+                        thickness: 2,
+                        color: Colors.white,
+                      ),
                     ),
-                    CustomTimeButton(
-                      label: '1:00',
-                      onPressed: () async {
-                        if (isRecordingInProgress) {
-                          XFile? rawVideo = await stopVideoRecording();
-                          EasyLoading.show(status: 'Video Cliping...');
-                          File videoFile = File(rawVideo!.path);
-                          int currentUnix =
-                              DateTime.now().millisecondsSinceEpoch;
-
-                          final directory =
-                              await getApplicationDocumentsDirectory();
-
-                          String fileFormat = videoFile.path.split('.').last;
-
-                          _videoFile = await videoFile.copy(
-                            '${directory.path}/$currentUnix.$fileFormat',
-                          );
-                          print(_videoFile!.path);
-                          VideoPlayerController controller =
-                              VideoPlayerController.file(
-                                  File(_videoFile!.path));
-                          await controller.initialize();
-                          double duration =
-                              controller.value.duration.inSeconds.toDouble();
-                          double last10Sec = (duration - 60.0);
-                          LastClipController().saveLastClipVideo(
-                              startValue: last10Sec,
-                              endValue: duration,
-                              onSave: (outcome) async {
-                                clipCon.clipedLastSecond(outcome);
-                                EasyLoading.showSuccess('Video Clipped!');
-                                //await GallerySaver.saveVideo(outcome);
-                              },
-                              videoFile: File(_videoFile!.path));
-                          await controller.dispose();
-                          EasyLoading.dismiss();
-                          await startVideoRecording();
-                        } else {
-                          print('asd');
-                        }
-                      },
+                  ),
+            // (oreintation == Orientation.landscape)
+            //     ? Align(
+            //         alignment: Alignment.center,
+            //         child: Text('data'),
+            //       )
+            //     :
+            (oreintation == Orientation.landscape)
+                ? Padding(
+                    padding: const EdgeInsets.only(
+                      right: 0.0,
                     ),
-                    CustomTimeButton(
-                      label: '3:00',
-                      onPressed: () async {
-                        if (isRecordingInProgress) {
-                          XFile? rawVideo = await stopVideoRecording();
-                          EasyLoading.show(status: 'Video Cliping...');
-                          File videoFile = File(rawVideo!.path);
+                    child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CustomTimeButton(
+                              label: '3:00',
+                              onPressed: () async {
+                                if (isRecordingInProgress) {
+                                  XFile? rawVideo = await stopVideoRecording();
+                                  EasyLoading.show(status: 'Video Cliping...');
+                                  File videoFile = File(rawVideo!.path);
 
-                          int currentUnix =
-                              DateTime.now().millisecondsSinceEpoch;
+                                  int currentUnix =
+                                      DateTime.now().millisecondsSinceEpoch;
 
-                          final directory =
-                              await getApplicationDocumentsDirectory();
+                                  final directory =
+                                      await getApplicationDocumentsDirectory();
 
-                          String fileFormat = videoFile.path.split('.').last;
+                                  String fileFormat =
+                                      videoFile.path.split('.').last;
 
-                          _videoFile = await videoFile.copy(
-                            '${directory.path}/$currentUnix.$fileFormat',
-                          );
-                          print(_videoFile!.path);
-                          VideoPlayerController controller =
-                              VideoPlayerController.file(
-                                  File(_videoFile!.path));
-                          await controller.initialize();
-                          double duration =
-                              controller.value.duration.inSeconds.toDouble();
-                          double last10Sec = (duration - 180.0);
-                          LastClipController().saveLastClipVideo(
-                              startValue: last10Sec,
-                              endValue: duration,
-                              onSave: (outcome) async {
-                                clipCon.clipedLastSecond(outcome);
-                                EasyLoading.showSuccess('Video Clipped!');
-                                //await GallerySaver.saveVideo(outcome);
+                                  _videoFile = await videoFile.copy(
+                                    '${directory.path}/$currentUnix.$fileFormat',
+                                  );
+                                  print(_videoFile!.path);
+                                  VideoPlayerController controller =
+                                      VideoPlayerController.file(
+                                          File(_videoFile!.path));
+                                  await controller.initialize();
+                                  double duration = controller
+                                      .value.duration.inSeconds
+                                      .toDouble();
+                                  double last10Sec = (duration - 180.0);
+                                  LastClipController().saveLastClipVideo(
+                                      startValue: last10Sec,
+                                      endValue: duration,
+                                      onSave: (outcome) async {
+                                        clipCon.clipedLastSecond(outcome);
+                                        EasyLoading.showSuccess(
+                                            'Video Clipped!');
+                                        //await GallerySaver.saveVideo(outcome);
+                                      },
+                                      videoFile: File(_videoFile!.path));
+                                  await controller.dispose();
+                                  EasyLoading.dismiss();
+                                  await startVideoRecording();
+                                } else {
+                                  print('asd');
+                                }
                               },
-                              videoFile: File(_videoFile!.path));
-                          await controller.dispose();
-                          EasyLoading.dismiss();
-                          await startVideoRecording();
-                        } else {
-                          print('asd');
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                            ),
+                            CustomTimeButton(
+                              label: '1:00',
+                              onPressed: () async {
+                                if (isRecordingInProgress) {
+                                  XFile? rawVideo = await stopVideoRecording();
+                                  EasyLoading.show(status: 'Video Cliping...');
+                                  File videoFile = File(rawVideo!.path);
+                                  int currentUnix =
+                                      DateTime.now().millisecondsSinceEpoch;
+
+                                  final directory =
+                                      await getApplicationDocumentsDirectory();
+
+                                  String fileFormat =
+                                      videoFile.path.split('.').last;
+
+                                  _videoFile = await videoFile.copy(
+                                    '${directory.path}/$currentUnix.$fileFormat',
+                                  );
+                                  print(_videoFile!.path);
+                                  VideoPlayerController controller =
+                                      VideoPlayerController.file(
+                                          File(_videoFile!.path));
+                                  await controller.initialize();
+                                  double duration = controller
+                                      .value.duration.inSeconds
+                                      .toDouble();
+                                  double last10Sec = (duration - 60.0);
+                                  LastClipController().saveLastClipVideo(
+                                      startValue: last10Sec,
+                                      endValue: duration,
+                                      onSave: (outcome) async {
+                                        clipCon.clipedLastSecond(outcome);
+                                        EasyLoading.showSuccess(
+                                            'Video Clipped!');
+                                        //await GallerySaver.saveVideo(outcome);
+                                      },
+                                      videoFile: File(_videoFile!.path));
+                                  await controller.dispose();
+                                  EasyLoading.dismiss();
+                                  await startVideoRecording();
+                                } else {
+                                  print('asd');
+                                }
+                              },
+                            ),
+                            CustomTimeButton(
+                              label: ':30',
+                              onPressed: () async {
+                                if (isRecordingInProgress) {
+                                  XFile? rawVideo = await stopVideoRecording();
+                                  EasyLoading.show(status: 'Video Cliping...');
+                                  File videoFile = File(rawVideo!.path);
+                                  int currentUnix =
+                                      DateTime.now().millisecondsSinceEpoch;
+
+                                  final directory =
+                                      await getApplicationDocumentsDirectory();
+
+                                  String fileFormat =
+                                      videoFile.path.split('.').last;
+
+                                  _videoFile = await videoFile.copy(
+                                    '${directory.path}/$currentUnix.$fileFormat',
+                                  );
+                                  print(_videoFile!.path);
+                                  VideoPlayerController controller =
+                                      VideoPlayerController.file(
+                                          File(_videoFile!.path));
+                                  await controller.initialize();
+                                  double duration = controller
+                                      .value.duration.inSeconds
+                                      .toDouble();
+                                  double last10Sec = (duration - 30.0);
+                                  LastClipController().saveLastClipVideo(
+                                      startValue: last10Sec,
+                                      endValue: duration,
+                                      onSave: (outcome) async {
+                                        clipCon.clipedLastSecond(outcome);
+                                        EasyLoading.showSuccess(
+                                            'Video Clipped!');
+
+                                        //await GallerySaver.saveVideo(outcome);
+                                      },
+                                      videoFile: File(_videoFile!.path));
+                                  await controller.dispose();
+                                  EasyLoading.dismiss();
+                                  await startVideoRecording();
+                                } else {
+                                  print('asd');
+                                }
+                              },
+                            ),
+                            CustomTimeButton(
+                              label: ':10',
+                              onPressed: () async {
+                                if (isRecordingInProgress) {
+                                  // XFile? rawVideo = await stopVideoRecording();
+                                  XFile? rawVideo = await stopVideoRecording();
+
+                                  EasyLoading.show(status: 'Video Cliping...');
+                                  File videoFile = File(rawVideo!.path);
+                                  int currentUnix =
+                                      DateTime.now().millisecondsSinceEpoch;
+
+                                  final directory =
+                                      await getApplicationDocumentsDirectory();
+
+                                  String fileFormat =
+                                      videoFile.path.split('.').last;
+
+                                  _videoFile = await videoFile.copy(
+                                    '${directory.path}/$currentUnix.$fileFormat',
+                                  );
+                                  print(_videoFile!.path);
+                                  VideoPlayerController controller =
+                                      VideoPlayerController.file(
+                                          File(_videoFile!.path));
+                                  await controller.initialize();
+                                  double duration = controller
+                                      .value.duration.inSeconds
+                                      .toDouble();
+                                  double last10Sec = (duration - 10.0);
+                                  LastClipController().saveLastClipVideo(
+                                      startValue: last10Sec,
+                                      endValue: duration,
+                                      onSave: (outcome) async {
+                                        clipCon.clipedLastSecond(outcome);
+                                        //await GallerySaver.saveVideo(outcome);
+                                        EasyLoading.showSuccess(
+                                            'Video Clipped!');
+                                      },
+                                      videoFile: File(_videoFile!.path));
+                                  await controller.dispose();
+                                  EasyLoading.dismiss();
+                                  await startVideoRecording();
+                                  if (oreintation == Orientation.landscape) {
+                                    SystemChrome.setPreferredOrientations([
+                                      DeviceOrientation.landscapeLeft,
+                                    ]);
+                                  } else if (oreintation ==
+                                      Orientation.portrait) {
+                                    SystemChrome.setPreferredOrientations([
+                                      DeviceOrientation.portraitUp,
+                                    ]);
+                                  }
+                                } else {
+                                  print('asd');
+                                }
+                              },
+                            ),
+                          ],
+                        )),
+                  )
+                : Align(
+                    alignment: Alignment.bottomCenter,
+                    child: buildMethod(clipCon, oreintation),
+                  ),
           ],
         ),
       );
     }
+  }
+
+  buildMethod(ClipController clipCon, Orientation oreintation) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10.0, bottom: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          CustomTimeButton(
+            label: ':10',
+            onPressed: () async {
+              if (isRecordingInProgress) {
+                // XFile? rawVideo = await stopVideoRecording();
+                XFile? rawVideo = await stopVideoRecording();
+
+                EasyLoading.show(status: 'Video Cliping...');
+                File videoFile = File(rawVideo!.path);
+                int currentUnix = DateTime.now().millisecondsSinceEpoch;
+
+                final directory = await getApplicationDocumentsDirectory();
+
+                String fileFormat = videoFile.path.split('.').last;
+
+                _videoFile = await videoFile.copy(
+                  '${directory.path}/$currentUnix.$fileFormat',
+                );
+                print(_videoFile!.path);
+                VideoPlayerController controller =
+                    VideoPlayerController.file(File(_videoFile!.path));
+                await controller.initialize();
+                double duration =
+                    controller.value.duration.inSeconds.toDouble();
+                double last10Sec = (duration - 10.0);
+                LastClipController().saveLastClipVideo(
+                    startValue: last10Sec,
+                    endValue: duration,
+                    onSave: (outcome) async {
+                      clipCon.clipedLastSecond(outcome);
+                      //await GallerySaver.saveVideo(outcome);
+                      EasyLoading.showSuccess('Video Clipped!');
+                    },
+                    videoFile: File(_videoFile!.path));
+                await controller.dispose();
+                EasyLoading.dismiss();
+                await startVideoRecording();
+                if (oreintation == Orientation.landscape) {
+                  SystemChrome.setPreferredOrientations([
+                    DeviceOrientation.landscapeLeft,
+                  ]);
+                } else if (oreintation == Orientation.portrait) {
+                  SystemChrome.setPreferredOrientations([
+                    DeviceOrientation.portraitUp,
+                  ]);
+                }
+              } else {
+                print('asd');
+              }
+            },
+          ),
+          CustomTimeButton(
+            label: ':30',
+            onPressed: () async {
+              if (isRecordingInProgress) {
+                XFile? rawVideo = await stopVideoRecording();
+                EasyLoading.show(status: 'Video Cliping...');
+                File videoFile = File(rawVideo!.path);
+                int currentUnix = DateTime.now().millisecondsSinceEpoch;
+
+                final directory = await getApplicationDocumentsDirectory();
+
+                String fileFormat = videoFile.path.split('.').last;
+
+                _videoFile = await videoFile.copy(
+                  '${directory.path}/$currentUnix.$fileFormat',
+                );
+                print(_videoFile!.path);
+                VideoPlayerController controller =
+                    VideoPlayerController.file(File(_videoFile!.path));
+                await controller.initialize();
+                double duration =
+                    controller.value.duration.inSeconds.toDouble();
+                double last10Sec = (duration - 30.0);
+                LastClipController().saveLastClipVideo(
+                    startValue: last10Sec,
+                    endValue: duration,
+                    onSave: (outcome) async {
+                      clipCon.clipedLastSecond(outcome);
+                      EasyLoading.showSuccess('Video Clipped!');
+
+                      //await GallerySaver.saveVideo(outcome);
+                    },
+                    videoFile: File(_videoFile!.path));
+                await controller.dispose();
+                EasyLoading.dismiss();
+                await startVideoRecording();
+              } else {
+                print('asd');
+              }
+            },
+          ),
+          CustomTimeButton(
+            label: '1:00',
+            onPressed: () async {
+              if (isRecordingInProgress) {
+                XFile? rawVideo = await stopVideoRecording();
+                EasyLoading.show(status: 'Video Cliping...');
+                File videoFile = File(rawVideo!.path);
+                int currentUnix = DateTime.now().millisecondsSinceEpoch;
+
+                final directory = await getApplicationDocumentsDirectory();
+
+                String fileFormat = videoFile.path.split('.').last;
+
+                _videoFile = await videoFile.copy(
+                  '${directory.path}/$currentUnix.$fileFormat',
+                );
+                print(_videoFile!.path);
+                VideoPlayerController controller =
+                    VideoPlayerController.file(File(_videoFile!.path));
+                await controller.initialize();
+                double duration =
+                    controller.value.duration.inSeconds.toDouble();
+                double last10Sec = (duration - 60.0);
+                LastClipController().saveLastClipVideo(
+                    startValue: last10Sec,
+                    endValue: duration,
+                    onSave: (outcome) async {
+                      clipCon.clipedLastSecond(outcome);
+                      EasyLoading.showSuccess('Video Clipped!');
+                      //await GallerySaver.saveVideo(outcome);
+                    },
+                    videoFile: File(_videoFile!.path));
+                await controller.dispose();
+                EasyLoading.dismiss();
+                await startVideoRecording();
+              } else {
+                print('asd');
+              }
+            },
+          ),
+          CustomTimeButton(
+            label: '3:00',
+            onPressed: () async {
+              if (isRecordingInProgress) {
+                XFile? rawVideo = await stopVideoRecording();
+                EasyLoading.show(status: 'Video Cliping...');
+                File videoFile = File(rawVideo!.path);
+
+                int currentUnix = DateTime.now().millisecondsSinceEpoch;
+
+                final directory = await getApplicationDocumentsDirectory();
+
+                String fileFormat = videoFile.path.split('.').last;
+
+                _videoFile = await videoFile.copy(
+                  '${directory.path}/$currentUnix.$fileFormat',
+                );
+                print(_videoFile!.path);
+                VideoPlayerController controller =
+                    VideoPlayerController.file(File(_videoFile!.path));
+                await controller.initialize();
+                double duration =
+                    controller.value.duration.inSeconds.toDouble();
+                double last10Sec = (duration - 180.0);
+                LastClipController().saveLastClipVideo(
+                    startValue: last10Sec,
+                    endValue: duration,
+                    onSave: (outcome) async {
+                      clipCon.clipedLastSecond(outcome);
+                      EasyLoading.showSuccess('Video Clipped!');
+                      //await GallerySaver.saveVideo(outcome);
+                    },
+                    videoFile: File(_videoFile!.path));
+                await controller.dispose();
+                EasyLoading.dismiss();
+                await startVideoRecording();
+              } else {
+                print('asd');
+              }
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   CameraPreview cameraPreview() {

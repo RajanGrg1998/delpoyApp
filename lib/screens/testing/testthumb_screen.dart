@@ -44,7 +44,8 @@ class _VideoOSIOSState extends State<VideoOSIOS> {
   @override
   Widget build(BuildContext context) {
     return controller.value.isInitialized
-        ? Container(
+        ? AspectRatio(
+            aspectRatio: 4 / 5,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(5),
               child: VideoPlayer(controller),

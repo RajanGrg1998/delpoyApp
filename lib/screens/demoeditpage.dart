@@ -3,13 +3,28 @@ import 'dart:io';
 import 'package:clip_test/screens/testing/testthumb_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import '../../../controller/clip_controller.dart';
 import 'editor/finale.dart';
 
-class DemoIOSEditClipPage extends StatelessWidget {
+class DemoIOSEditClipPage extends StatefulWidget {
   const DemoIOSEditClipPage({Key? key}) : super(key: key);
+
+  @override
+  State<DemoIOSEditClipPage> createState() => _DemoIOSEditClipPageState();
+}
+
+class _DemoIOSEditClipPageState extends State<DemoIOSEditClipPage> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +183,7 @@ class DemoIOSEditClipPage extends StatelessWidget {
         ),
         itemBuilder: (context, index) {
           return Padding(
-            padding: const EdgeInsets.all(5.0),
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
             child: GestureDetector(
               // onLongPress: () {
               //   clipCon.isMultiSelectionValue(true);
@@ -280,6 +295,12 @@ class DemoIOSEditClipPage extends StatelessWidget {
               onPressed: () async {
                 Provider.of<ClipController>(context, listen: false)
                     .onFinished();
+                SystemChrome.setPreferredOrientations([
+                  DeviceOrientation.portraitUp,
+                  DeviceOrientation.portraitDown,
+                  DeviceOrientation.landscapeLeft,
+                  DeviceOrientation.landscapeRight,
+                ]);
                 Navigator.pop(context);
                 Navigator.pop(context);
               },

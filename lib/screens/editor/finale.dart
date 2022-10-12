@@ -5,9 +5,9 @@ import 'package:clip_test/helpers/editor/video_editor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:helpers/helpers/transition.dart';
 import 'package:provider/provider.dart';
-
 
 class FinalVideoEditor extends StatefulWidget {
   const FinalVideoEditor({Key? key, required this.file, required this.index})
@@ -43,8 +43,10 @@ class _FinalVideoEditorState extends State<FinalVideoEditor> {
     EasyLoading.show(status: 'Video Trimming...');
     // NOTE: To use `-crf 1` and [VideoExportPreset] you need `ffmpeg_kit_flutter_min_gpl` package (with `ffmpeg_kit` only it won't work)
     await _controller.exportVideo(
+      // isFiltersEnabled: false,
+
       // preset: VideoExportPreset.medium,
-      // customInstruction: "-crf 17",
+      customInstruction: "-vb 20M",
       // onProgress: (stats, value) => _exportingProgress.value = value,
 
       onCompleted: (file) async {
@@ -67,7 +69,8 @@ class _FinalVideoEditorState extends State<FinalVideoEditor> {
         //       ));
         //   clipController.changeRotationButtonPressed(false);
         // } else {
-          clipController.addTrimmedSession(file.path);
+        clipController.addTrimmedSession(file.path);
+        // await GallerySaver.saveVideo(file.path);
         // }
 
         EasyLoading.showSuccess('Video Trimmed!');
@@ -82,111 +85,114 @@ class _FinalVideoEditorState extends State<FinalVideoEditor> {
   @override
   Widget build(BuildContext context) {
     var clipCon = Provider.of<ClipController>(context);
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: CupertinoColors.black,
-        padding: EdgeInsetsDirectional.only(start: 5, end: 16),
-        middle: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            CupertinoButton(
-              padding: EdgeInsets.symmetric(vertical: 5),
-              onPressed: () {
-                _controller.rotate90Degrees(RotateDirection.left);
-                clipCon.changeRotationButtonPressed(true);
-              },
-              child: const Icon(
-                Icons.rotate_left,
-                color: Colors.white,
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: CupertinoPageScaffold(
+        navigationBar: CupertinoNavigationBar(
+          backgroundColor: CupertinoColors.black,
+          padding: EdgeInsetsDirectional.only(start: 5, end: 16),
+          middle: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              CupertinoButton(
+                padding: EdgeInsets.symmetric(vertical: 5),
+                onPressed: () {
+                  _controller.rotate90Degrees(RotateDirection.left);
+                  clipCon.changeRotationButtonPressed(true);
+                },
+                child: const Icon(
+                  Icons.rotate_left,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            CupertinoButton(
-              padding: EdgeInsets.symmetric(vertical: 5),
-              onPressed: () {
-                _controller.rotate90Degrees(RotateDirection.right);
-                clipCon.changeRotationButtonPressed(true);
-              },
-              child: const Icon(
-                Icons.rotate_right,
-                color: Colors.white,
+              CupertinoButton(
+                padding: EdgeInsets.symmetric(vertical: 5),
+                onPressed: () {
+                  _controller.rotate90Degrees(RotateDirection.right);
+                  clipCon.changeRotationButtonPressed(true);
+                },
+                child: const Icon(
+                  Icons.rotate_right,
+                  color: Colors.white,
+                ),
               ),
-            ),
-          ],
-        ),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.only(left: 20),
-          child: Text(
-            'Trim',
-            style: TextStyle(
-              fontSize: 15,
-              color: Colors.white,
-            ),
+            ],
           ),
-          onPressed: () {
-            _exportVideo(clipCon);
-          },
+          trailing: CupertinoButton(
+            padding: EdgeInsets.only(left: 20),
+            child: Text(
+              'Trim',
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.white,
+              ),
+            ),
+            onPressed: () {
+              _exportVideo(clipCon);
+            },
+          ),
+          leading: CupertinoNavigationBarBackButton(
+            color: Colors.white,
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
-        leading: CupertinoNavigationBarBackButton(
-          color: Colors.white,
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      backgroundColor: Colors.black,
-      child: _controller.initialized
-          ? SafeArea(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: DefaultTabController(
-                      length: 2,
-                      child: Column(
-                        children: [
-                          Expanded(
-                              child: TabBarView(
-                            physics: const NeverScrollableScrollPhysics(),
-                            children: [
-                              Stack(alignment: Alignment.center, children: [
-                                CropGridViewer(
-                                  controller: _controller,
-                                  showGrid: false,
-                                ),
-                                AnimatedBuilder(
-                                  animation: _controller.video,
-                                  builder: (_, __) => OpacityTransition(
-                                    visible: !_controller.isPlaying,
-                                    child: GestureDetector(
-                                      onTap: _controller.video.play,
-                                      child: Container(
-                                        width: 40,
-                                        height: 40,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
+        backgroundColor: Colors.black,
+        child: _controller.initialized
+            ? SafeArea(
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: DefaultTabController(
+                        length: 2,
+                        child: Column(
+                          children: [
+                            Expanded(
+                                child: TabBarView(
+                              physics: const NeverScrollableScrollPhysics(),
+                              children: [
+                                Stack(alignment: Alignment.center, children: [
+                                  CropGridViewer(
+                                    controller: _controller,
+                                    showGrid: false,
+                                  ),
+                                  AnimatedBuilder(
+                                    animation: _controller.video,
+                                    builder: (_, __) => OpacityTransition(
+                                      visible: !_controller.isPlaying,
+                                      child: GestureDetector(
+                                        onTap: _controller.video.play,
+                                        child: Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(Icons.play_arrow,
+                                              color: Colors.black),
                                         ),
-                                        child: const Icon(Icons.play_arrow,
-                                            color: Colors.black),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ]),
-                              CoverViewer(controller: _controller)
-                            ],
-                          )),
-                          Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: _trimSlider()),
-                        ],
+                                ]),
+                                CoverViewer(controller: _controller)
+                              ],
+                            )),
+                            Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: _trimSlider()),
+                          ],
+                        ),
                       ),
-                    ),
-                  )
-                ],
-              ),
-            )
-          : const Center(child: CircularProgressIndicator()),
+                    )
+                  ],
+                ),
+              )
+            : const Center(child: CircularProgressIndicator()),
+      ),
     );
   }
 
