@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:clip_test/model/videofile.dart';
 import 'package:clip_test/screens/demoeditpage.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -269,10 +270,10 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
 
                                 // print(
                                 //     'session: ${clipCon.fullSessionList}');
-                                if (clipCon.clippedSessionList.isEmpty) {
-                                  return _showMyDialog(
-                                      context, _videoFile!.path);
-                                }
+                                // if (clipCon.clippedSessionList.isEmpty) {
+                                //   return _showMyDialog(
+                                //       context, _videoFile!.path);
+                                // }
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -697,7 +698,8 @@ class _CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
                     startValue: last10Sec,
                     endValue: duration,
                     onSave: (outcome) async {
-                      clipCon.clipedLastSecond(outcome);
+                      clipCon.addItem(VideoFileModel(videoPath: outcome));
+                      //clipCon.clipedLastSecond(outcome);
                       //await GallerySaver.saveVideo(outcome);
                       EasyLoading.showSuccess('Video Clipped!');
                     },

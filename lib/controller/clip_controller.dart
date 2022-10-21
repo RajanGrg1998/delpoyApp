@@ -4,11 +4,94 @@ import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:gallery_saver/gallery_saver.dart';
+import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../model/videofile.dart';
+
 class ClipController extends ChangeNotifier {
+  bool isLastSeconButtonPressed = false;
 
+  changeLastSecondButtonPressed(bool value) {
+    isLastSeconButtonPressed = value;
+    print('last second clip button $isLandscapeRecordingClicked');
+    notifyListeners();
+  }
 
+  //hive add last second cliped video
+  addItem(VideoFileModel videoFileModel) async {
+    var box = await Hive.openBox<VideoFileModel>('clipedvideo');
+
+    box.add(videoFileModel);
+
+    notifyListeners();
+  }
+
+//update video
+  updateItem(int index, VideoFileModel inventory) {
+    final box = Hive.box<VideoFileModel>('clipedvideo');
+
+    box.putAt(index, inventory);
+
+    notifyListeners();
+  }
+
+  deleteItem(int index) {
+    final box = Hive.box<VideoFileModel>('clipedvideo');
+
+    // box.deleteAt(index);
+    box.deleteAt(index);
+
+    getItem();
+
+    notifyListeners();
+  }
+
+  void multi2(VideoFileModel clippedPath) {
+    if (isMultiSelectionEnabled) {
+      if (selectedItem.contains(clippedPath)) {
+        selectedItem.remove(clippedPath);
+      } else {
+        selectedItem.add(clippedPath);
+      }
+      notifyListeners();
+    } else {
+      //Other logic
+    }
+  }
+
+  removeClisssssp() {
+    // for (var i = 0; i < selectedItem.length; i++) {
+    //   deleteItem(i);
+    // }
+    final box = Hive.box<VideoFileModel>('clipedvideo');
+    final Map<dynamic, VideoFileModel> deliveriesMap = box.toMap();
+    dynamic desiredKey;
+
+    selectedItem.forEach((nature) {
+      clippedSessionList.remove(nature);
+      deliveriesMap.forEach((key, value) {
+        if (value.videoPath == nature.videoPath) desiredKey = key;
+      });
+      box.delete(desiredKey);
+      notifyListeners();
+      getItem();
+      notifyListeners();
+      // deleteItem(nature);
+    });
+
+    selectedItem.clear();
+    //  getItem();
+    notifyListeners();
+  }
+
+  Future<List<VideoFileModel>> getItem() async {
+    final box = await Hive.openBox<VideoFileModel>('clipedvideo');
+
+    clippedSessionList = box.values.toList();
+    notifyListeners();
+    return clippedSessionList;
+  }
 
   //camera
   List<VideoFileModel> clippedSessionList = [];
@@ -224,6 +307,7 @@ class ClipController extends ChangeNotifier {
   removeClip() {
     selectedItem.forEach((nature) {
       clippedSessionList.remove(nature);
+      // deleteItem(nature);
     });
     selectedItem.clear();
     notifyListeners();
@@ -304,14 +388,3 @@ class ClipController extends ChangeNotifier {
 //   });
 // }
 
-class VideoFileModel {
-  final String videoPath;
-  // final Uint8List thumbnailFile;
-  final bool isNewThumnailCreated;
-
-  VideoFileModel({
-    required this.videoPath,
-    // required this.thumbnailFile,
-    this.isNewThumnailCreated = false,
-  });
-}

@@ -1,27 +1,41 @@
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:clip_test/controller/camera_con.dart';
 import 'package:clip_test/controller/rotate_controller.dart';
+import 'package:clip_test/model/videofile.dart';
+import 'package:clip_test/screens/demo/demo_home.dart';
 import 'package:clip_test/screens/homepage.dart';
+import 'package:clip_test/screens/splash/splash_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 
+import 'package:path_provider/path_provider.dart' as pathProvider;
 import 'controller/clip_controller.dart';
 
 List<CameraDescription> cameras = [];
 Future<void> main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
+    Directory directory = await pathProvider.getApplicationDocumentsDirectory();
+    Hive.init(directory.path);
+
+    Hive.registerAdapter(VideoFileModelAdapter());
 
     cameras = await availableCameras();
   } on CameraException catch (e) {
     print('Error in fetching the cameras: $e');
   }
-  // SystemChrome.setPreferredOrientations([
-  //   DeviceOrientation.portraitUp,
-  // ]);
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
     SystemUiOverlay.bottom,
   ]);
@@ -63,7 +77,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         // theme: ThemeData(fontFamily: 'SF-Pro'),
-        home: const CameraPage(),
+        home: const SplashScreen(),
         builder: EasyLoading.init(),
       ),
     );
