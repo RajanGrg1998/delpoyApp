@@ -84,7 +84,7 @@ class CustomTimeButton extends StatelessWidget {
             style: TextStyle(color: Colors.black),
           ),
           style: ElevatedButton.styleFrom(
-              primary: Colors.white,
+              backgroundColor: Colors.white,
               shape: CircleBorder(),
               side: BorderSide(color: Colors.black, width: 2)),
         )

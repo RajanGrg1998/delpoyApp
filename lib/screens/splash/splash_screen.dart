@@ -10,6 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:provider/provider.dart';
+
+import '../../controller/notification_controller.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);

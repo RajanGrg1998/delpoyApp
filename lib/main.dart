@@ -2,10 +2,9 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:clip_test/controller/camera_con.dart';
+import 'package:clip_test/controller/notification_controller.dart';
 import 'package:clip_test/controller/rotate_controller.dart';
 import 'package:clip_test/model/videofile.dart';
-import 'package:clip_test/screens/demo/demo_home.dart';
-import 'package:clip_test/screens/homepage.dart';
 import 'package:clip_test/screens/splash/splash_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -60,6 +59,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => CameraProviderController(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => NotificationController(),
         )
       ],
       child: CupertinoApp(
@@ -79,6 +81,39 @@ class MyApp extends StatelessWidget {
         // theme: ThemeData(fontFamily: 'SF-Pro'),
         home: const SplashScreen(),
         builder: EasyLoading.init(),
+      ),
+    );
+  }
+}
+
+class DDD extends StatefulWidget {
+  const DDD({Key? key}) : super(key: key);
+
+  @override
+  State<DDD> createState() => _DDDState();
+}
+
+class _DDDState extends State<DDD> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    Provider.of<NotificationController>(context, listen: false).initialize();
+    Provider.of<NotificationController>(context, listen: false)
+        .checkforNotification();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Provider.of<NotificationController>(context, listen: false)
+                .showNotication();
+          },
+          child: Text('Notification'),
+        ),
       ),
     );
   }

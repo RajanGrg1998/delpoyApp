@@ -8,6 +8,7 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../model/videofile.dart';
+import 'notification_controller.dart';
 
 class ClipController extends ChangeNotifier {
   bool isLastSeconButtonPressed = false;
@@ -33,6 +34,11 @@ class ClipController extends ChangeNotifier {
 
     box.putAt(index, inventory);
 
+    notifyListeners();
+  }
+
+  Future<void> deleteVideoClipped(VideoFileModel videoFileModel) async {
+    videoFileModel.delete();
     notifyListeners();
   }
 
@@ -203,7 +209,7 @@ class ClipController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> mergeRequest() async {
+  Future<void> mergeRequest(NotificationController notificationCon) async {
     final appDir = await getApplicationDocumentsDirectory();
     String rawDocumentPath = appDir.path;
     final outputPath = '$rawDocumentPath/output.mp4';
@@ -252,6 +258,7 @@ class ClipController extends ChangeNotifier {
         debugPrint('Video successfuly saved');
         EasyLoading.showSuccess('Video Merged!');
         onSave(outputPath);
+        notificationCon.showNotication();
         timmedSessionList = [];
         notifyListeners();
         EasyLoading.dismiss();
@@ -314,7 +321,8 @@ class ClipController extends ChangeNotifier {
   }
 
 //for merging selected clip
-  Future<void> mergeSelectedClips() async {
+  Future<void> mergeSelectedClips(
+      NotificationController notificationCon) async {
     final appDir = await getApplicationDocumentsDirectory();
     String rawDocumentPath = appDir.path;
     final outputPath = '$rawDocumentPath/output.mp4';
@@ -361,8 +369,11 @@ class ClipController extends ChangeNotifier {
       if (ReturnCode.isSuccess(returnCode)) {
         debugPrint("FFmpeg processing completed successfully.");
         debugPrint('Video successfuly saved');
+
         EasyLoading.showSuccess('Video Merged!');
+
         onSave(outputPath);
+        notificationCon.showNotication();
         selectedItem = [];
         notifyListeners();
         EasyLoading.dismiss();

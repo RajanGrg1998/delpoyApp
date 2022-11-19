@@ -29,14 +29,12 @@ class _VideoOSIOSState extends State<VideoOSIOS> {
 
   @override
   void initState() {
-    // TODO: implement initState
     _playvideo();
     super.initState();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     controller.dispose();
     super.dispose();
   }

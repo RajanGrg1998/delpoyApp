@@ -2,21 +2,29 @@ import 'dart:io';
 
 import 'package:clip_test/controller/clip_controller.dart';
 import 'package:clip_test/helpers/editor/video_editor.dart';
+import 'package:clip_test/model/videofile.dart';
+import 'package:clip_test/screens/demoeditpage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:gallery_saver/gallery_saver.dart';
 import 'package:helpers/helpers/transition.dart';
 import 'package:provider/provider.dart';
 
 class FinalVideoEditor extends StatefulWidget {
-  const FinalVideoEditor({Key? key, required this.file, required this.index})
-      : super(key: key);
-  final File file;
-  final int index;
+  const FinalVideoEditor({
+    Key? key,
+    required this.videoFileModel,
+  }) : super(key: key);
+
+  final VideoFileModel videoFileModel;
 
   @override
   State<FinalVideoEditor> createState() => _FinalVideoEditorState();
+}
+
+enum MenuValues {
+  trim,
+  delete,
 }
 
 class _FinalVideoEditorState extends State<FinalVideoEditor> {
@@ -27,7 +35,7 @@ class _FinalVideoEditorState extends State<FinalVideoEditor> {
   @override
   void initState() {
     _controller = VideoEditorController.file(
-      widget.file,
+      File(widget.videoFileModel.videoPath),
       maxDuration: const Duration(minutes: 5),
     )..initialize().then((_) => setState(() {}));
     super.initState();
@@ -99,7 +107,7 @@ class _FinalVideoEditorState extends State<FinalVideoEditor> {
                 padding: EdgeInsets.symmetric(vertical: 5),
                 onPressed: () {
                   _controller.rotate90Degrees(RotateDirection.left);
-                  clipCon.changeRotationButtonPressed(true);
+                  // clipCon.changeRotationButtonPressed(true);
                 },
                 child: const Icon(
                   Icons.rotate_left,
@@ -110,7 +118,7 @@ class _FinalVideoEditorState extends State<FinalVideoEditor> {
                 padding: EdgeInsets.symmetric(vertical: 5),
                 onPressed: () {
                   _controller.rotate90Degrees(RotateDirection.right);
-                  clipCon.changeRotationButtonPressed(true);
+                  // clipCon.changeRotationButtonPressed(true);
                 },
                 child: const Icon(
                   Icons.rotate_right,
@@ -119,19 +127,54 @@ class _FinalVideoEditorState extends State<FinalVideoEditor> {
               ),
             ],
           ),
-          trailing: CupertinoButton(
-            padding: EdgeInsets.only(left: 20),
-            child: Text(
-              'Trim',
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.white,
-              ),
+          trailing: Transform.translate(
+            offset: Offset(10, 0),
+            child: PopupMenuButton<MenuValues>(
+              iconSize: 30,
+              padding: EdgeInsets.zero,
+              icon: Icon(Icons.more_vert, color: Colors.white),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  child: Text('Trim'),
+                  value: MenuValues.trim,
+                ),
+                PopupMenuItem(
+                  child: Text('Delete'),
+                  value: MenuValues.delete,
+                ),
+              ],
+              onSelected: (value) {
+                switch (value) {
+                  case MenuValues.trim:
+                    _exportVideo(clipCon);
+                    break;
+                  case MenuValues.delete:
+                    Provider.of<ClipController>(context, listen: false)
+                        .deleteVideoClipped(widget.videoFileModel);
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DemoIOSEditClipPage(),
+                        ),
+                        (route) => false);
+                    break;
+                }
+              },
             ),
-            onPressed: () {
-              _exportVideo(clipCon);
-            },
           ),
+          //  CupertinoButton(
+          //   padding: EdgeInsets.only(left: 20),
+          //   child: Text(
+          //     'Trim',
+          //     style: TextStyle(
+          //       fontSize: 15,
+          //       color: Colors.white,
+          //     ),
+          //   ),
+          //   onPressed: () {
+          //     _exportVideo(clipCon);
+          //   },
+          // ),
           leading: CupertinoNavigationBarBackButton(
             color: Colors.white,
             onPressed: () {

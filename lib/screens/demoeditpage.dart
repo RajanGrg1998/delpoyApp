@@ -5,9 +5,12 @@ import 'package:clip_test/screens/testing/testthumb_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import '../../../controller/clip_controller.dart';
+import '../controller/notification_controller.dart';
+import '../model/videofile.dart';
 import 'editor/finale.dart';
 
 class DemoIOSEditClipPage extends StatefulWidget {
@@ -20,6 +23,7 @@ class DemoIOSEditClipPage extends StatefulWidget {
 class _DemoIOSEditClipPageState extends State<DemoIOSEditClipPage> {
   @override
   void initState() {
+    Provider.of<NotificationController>(context, listen: false).initialize();
     // TODO: implement initState
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -41,17 +45,16 @@ class _DemoIOSEditClipPageState extends State<DemoIOSEditClipPage> {
 
   @override
   Widget build(BuildContext context) {
-    //  var clipCon = Provider.of<ClipController>(context);
-    context.watch<ClipController>().getItem();
-    return Consumer<ClipController>(
-      builder: (context, clipCon, child) {
-        return CupertinoPageScaffold(
-          backgroundColor: CupertinoColors.darkBackgroundGray,
-          navigationBar: CupertinoNavigationBar(
-            backgroundColor: CupertinoColors.black,
-            padding: EdgeInsetsDirectional.zero,
-            leading: clipCon.isMultiSelectionEnabled ||
-                    clipCon.selectedItem.isNotEmpty
+    var notificationController = Provider.of<NotificationController>(context);
+    var clipCon = Provider.of<ClipController>(context);
+
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.darkBackgroundGray,
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: CupertinoColors.black,
+        padding: EdgeInsetsDirectional.zero,
+        leading:
+            clipCon.isMultiSelectionEnabled || clipCon.selectedItem.isNotEmpty
                 ? CupertinoButton(
                     padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                     child: Text(
@@ -101,247 +104,219 @@ class _DemoIOSEditClipPageState extends State<DemoIOSEditClipPage> {
                       // _showMyDialog(context);
                     },
                   ),
-            // : Row(
-            //     mainAxisAlignment: MainAxisAlignment.start,
-            //     children: [
-            //       SizedBox(width: 2),
-            //       GestureDetector(
-            //         onTap: () {
-            //           _showMyDialog(context);
-            //         },
-            //         child: Icon(
-            //           CupertinoIcons.back,
-            //           color: CupertinoColors.white,
-            //         ),
-            //       ),
-            // SizedBox(width: 5),
-            // Text(
-            //   'Edit Clips',
-            //   style: TextStyle(
-            //       color: CupertinoColors.white,
-            //       fontSize: 15,
-            //       fontWeight: FontWeight.bold),
-            // )
-            //     ],
-            //   ),
-            trailing: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                clipCon.isMultiSelectionEnabled
-                    ? Visibility(
-                        visible: clipCon.selectedItem.isNotEmpty,
-                        child: CupertinoButton(
-                          padding: EdgeInsets.only(right: 15),
-                          child: Text(
-                            'Delete',
-                            style: TextStyle(
-                              color: CupertinoColors.white,
-                              fontSize: 15,
-                            ),
-                          ),
-                          onPressed: () {
-                            clipCon.removeClisssssp();
-                          },
-                        ),
-                      )
-                    : Container(),
-                clipCon.isMultiSelectionEnabled
-                    ? Visibility(
-                        visible: clipCon.selectedItem.isNotEmpty,
-                        child: CupertinoButton(
-                          padding: EdgeInsets.only(right: 15),
-                          child: Text(
-                            'Merge',
-                            style: TextStyle(
-                              color: CupertinoColors.white,
-                              fontSize: 15,
-                            ),
-                          ),
-                          onPressed: () {
-                            clipCon.mergeSelectedClips();
-                            //clipCon.selectedItem.clear();
-                            clipCon.isMultiSelectionValue(false);
-                          },
-                        ),
-                      )
-                    : Container(),
-                !clipCon.isMultiSelectionEnabled &&
-                        clipCon.timmedSessionList.isEmpty
-                    ? CupertinoButton(
-                        padding: EdgeInsets.only(right: 15),
-                        child: Text(
-                          'Merge Clips',
-                          style: TextStyle(
-                            color: CupertinoColors.white,
-                            fontSize: 15,
-                          ),
-                        ),
-                        onPressed: () {
-                          clipCon.isMultiSelectionValue(true);
-                          clipCon.doMultiSelection(
-                              clipCon.clippedSessionList.first);
-                        },
-                      )
-                    : SizedBox.shrink(),
-                clipCon.timmedSessionList.isNotEmpty
-                    ? Visibility(
-                        visible: clipCon.isMultiSelectionEnabled == false,
-                        child: CupertinoButton(
-                          padding: EdgeInsets.only(right: 15),
-                          child: Text(
-                            'Merge Edits',
-                            style: TextStyle(
-                              color: CupertinoColors.white,
-                              fontSize: 15,
-                            ),
-                          ),
-                          onPressed: () {
-                            clipCon.mergeRequest();
-                          },
-                        ),
-                      )
-                    : SizedBox.shrink(),
-              ],
-            ),
-          ),
-          child: GridView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-            itemCount: clipCon.clippedSessionList.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-            ),
-            itemBuilder: (context, index) {
-              return Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                child: GestureDetector(
-                  // onLongPress: () {
-                  //   clipCon.isMultiSelectionValue(true);
-                  //   clipCon.doMultiSelection(clipCon.clippedSessionList[index]);
-                  // },
-                  onTap: clipCon.isMultiSelectionEnabled
-                      ? () {
-                          clipCon.multi2(clipCon.clippedSessionList[index]);
-                        }
-                      : () {
-                          Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                builder: (context) => FinalVideoEditor(
-                                    index: index,
-                                    file: File(clipCon
-                                        .clippedSessionList[index].videoPath)),
-                              ));
-                          //  clipCon.rotateVideo(clipCon.clippedSessionList[index].videoPath);
-                        },
-                  // child: Stack(
-                  //   children: [
-                  //     // DemoDDD(path: clipCon.clippedSessionList[index].videoPath),
-                  //     Container(
-                  //       decoration: BoxDecoration(
-                  //         borderRadius: BorderRadius.circular(5),
-                  //       ),
-                  //       child: ClipRRect(
-                  //           borderRadius: BorderRadius.circular(5),
-                  //           child: Rotation(
-                  //               videoFileModel: clipCon.clippedSessionList[index])),
-                  //     ),
-                  //     Padding(
-                  //       padding: const EdgeInsets.only(right: 5.0, top: 5.0),
-                  //       child: Align(
-                  //         alignment: Alignment.topRight,
-                  //         child: Visibility(
-                  //           visible: clipCon.isMultiSelectionEnabled &&
-                  //               clipCon.selectedItem.isNotEmpty,
-                  //           child: Icon(
-                  //             clipCon.selectedItem
-                  //                     .contains(clipCon.clippedSessionList[index])
-                  //                 ? Icons.check_circle
-                  //                 : Icons.radio_button_unchecked,
-                  //             size: 25,
-                  //             color: Colors.white,
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
-                  child: Stack(
-                    children: [
-                      // Container(
-                      //   decoration: BoxDecoration(
-                      //     borderRadius: BorderRadius.circular(5),
-                      //   ),
-                      //   child: ClipRRect(
-                      //       borderRadius: BorderRadius.circular(5),
-                      //       child: Rotation(
-                      //           videoFileModel: clipCon.clippedSessionList[index])),
-                      // ),
-                      VideoOSIOS(
-                          path: clipCon.clippedSessionList[index].videoPath),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 5.0, top: 5.0),
-                        child: Align(
-                          alignment: Alignment.topRight,
-                          child: Visibility(
-                            visible: clipCon.isMultiSelectionEnabled &&
-                                clipCon.selectedItem.isNotEmpty,
-                            child: Icon(
-                              clipCon.selectedItem.contains(
-                                      clipCon.clippedSessionList[index])
-                                  ? Icons.check_circle
-                                  : Icons.radio_button_unchecked,
-                              size: 25,
-                              color: Colors.white,
-                            ),
-                          ),
+        // : Row(
+        //     mainAxisAlignment: MainAxisAlignment.start,
+        //     children: [
+        //       SizedBox(width: 2),
+        //       GestureDetector(
+        //         onTap: () {
+        //           _showMyDialog(context);
+        //         },
+        //         child: Icon(
+        //           CupertinoIcons.back,
+        //           color: CupertinoColors.white,
+        //         ),
+        //       ),
+        // SizedBox(width: 5),
+        // Text(
+        //   'Edit Clips',
+        //   style: TextStyle(
+        //       color: CupertinoColors.white,
+        //       fontSize: 15,
+        //       fontWeight: FontWeight.bold),
+        // )
+        //     ],
+        //   ),
+        trailing: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            clipCon.isMultiSelectionEnabled
+                ? Visibility(
+                    visible: clipCon.selectedItem.isNotEmpty,
+                    child: CupertinoButton(
+                      padding: EdgeInsets.only(right: 15),
+                      child: Text(
+                        'Delete',
+                        style: TextStyle(
+                          color: CupertinoColors.white,
+                          fontSize: 15,
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                      onPressed: () {
+                        clipCon.removeClisssssp();
+                      },
+                    ),
+                  )
+                : Container(),
+            clipCon.isMultiSelectionEnabled
+                ? Visibility(
+                    visible: clipCon.selectedItem.isNotEmpty,
+                    child: CupertinoButton(
+                      padding: EdgeInsets.only(right: 15),
+                      child: Text(
+                        'Merge',
+                        style: TextStyle(
+                          color: CupertinoColors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                      onPressed: () {
+                        clipCon.mergeSelectedClips(notificationController);
+                        // Provider.of<NotificationController>(context,
+                        //         listen: false)
+                        //     .showNotication();
+                        //clipCon.selectedItem.clear();
+                        clipCon.isMultiSelectionValue(false);
+                      },
+                    ),
+                  )
+                : Container(),
+            !clipCon.isMultiSelectionEnabled &&
+                    clipCon.timmedSessionList.isEmpty
+                ? CupertinoButton(
+                    padding: EdgeInsets.only(right: 15),
+                    child: Text(
+                      'Merge Clips',
+                      style: TextStyle(
+                        color: CupertinoColors.white,
+                        fontSize: 15,
+                      ),
+                    ),
+                    onPressed: () {
+                      clipCon.isMultiSelectionValue(true);
+                      clipCon
+                          .doMultiSelection(clipCon.clippedSessionList.first);
+                    },
+                  )
+                : SizedBox.shrink(),
+            clipCon.timmedSessionList.isNotEmpty
+                ? Visibility(
+                    visible: clipCon.isMultiSelectionEnabled == false,
+                    child: CupertinoButton(
+                      padding: EdgeInsets.only(right: 15),
+                      child: Text(
+                        'Merge Edits',
+                        style: TextStyle(
+                          color: CupertinoColors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                      onPressed: () {
+                        clipCon.mergeRequest(notificationController);
+                      },
+                    ),
+                  )
+                : SizedBox.shrink(),
+          ],
+        ),
+      ),
+      child: FutureBuilder(
+          future: Hive.openBox<VideoFileModel>('clipedvideo'),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return ValueListenableBuilder(
+                valueListenable:
+                    Hive.box<VideoFileModel>('clipedvideo').listenable(),
+                builder: (BuildContext context, Box box, Widget? child) {
+                  final clippedVideos =
+                      box.values.toList().cast<VideoFileModel>();
+                  return GridView.builder(
+                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                    itemCount: clippedVideos.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                    ),
+                    itemBuilder: (context, index) {
+                      final clipIndex = clippedVideos[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 5),
+                        child: GestureDetector(
+                          onLongPress: () {
+                            _showMyDialog(context, clipIndex);
+                          },
+                          onTap: clipCon.isMultiSelectionEnabled
+                              ? () {
+                                  clipCon.multi2(clipIndex);
+                                }
+                              : () {
+                                  Navigator.push(
+                                    context,
+                                    CupertinoPageRoute(
+                                      builder: (context) => FinalVideoEditor(
+                                        videoFileModel: clipIndex,
+                                      ),
+                                    ),
+                                  );
+                                  //  clipCon.rotateVideo(clipIndex.videoPath);
+                                },
+                          child: Stack(
+                            children: [
+                              VideoOSIOS(path: clipIndex.videoPath),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(right: 5.0, top: 5.0),
+                                child: Align(
+                                  alignment: Alignment.topRight,
+                                  child: Visibility(
+                                    visible: clipCon.isMultiSelectionEnabled &&
+                                        clipCon.selectedItem.isNotEmpty,
+                                    child: Icon(
+                                      clipCon.selectedItem.contains(clipIndex)
+                                          ? Icons.check_circle
+                                          : Icons.radio_button_unchecked,
+                                      size: 25,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
               );
+            } else if (snapshot.hasError) {
+              return Text(snapshot.hasError.toString());
+            } else
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+          }),
+    );
+  }
+}
+
+Future<void> _showMyDialog(
+    BuildContext context, VideoFileModel videoFileModel) async {
+  return showDialog<void>(
+    context: context,
+    // user must tap button!
+    builder: (BuildContext context) {
+      return CupertinoAlertDialog(
+        title: const Text('Delete Clip?'),
+        content: Text('Do you want to delete this Cliped Video'),
+        actions: <Widget>[
+          CupertinoDialogAction(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.pop(context);
+              }),
+          CupertinoDialogAction(
+            child: const Text('Yes'),
+            onPressed: () async {
+              Provider.of<ClipController>(context, listen: false)
+                  .deleteVideoClipped(videoFileModel);
+              Navigator.pop(context);
             },
           ),
-        );
-      },
-    );
-  }
-
-  Future<void> _showMyDialog(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      // user must tap button!
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: const Text('Clear Recorded Session'),
-          content: Text('Do you want to clear Recorded Session and go back'),
-          actions: <Widget>[
-            CupertinoDialogAction(
-                child: const Text('No'),
-                onPressed: () {
-                  Navigator.pop(context);
-                }),
-            CupertinoDialogAction(
-              child: const Text('Yes'),
-              onPressed: () async {
-                Provider.of<ClipController>(context, listen: false)
-                    .onFinished();
-                SystemChrome.setPreferredOrientations([
-                  DeviceOrientation.portraitUp,
-                  DeviceOrientation.portraitDown,
-                  DeviceOrientation.landscapeLeft,
-                  DeviceOrientation.landscapeRight,
-                ]);
-                Navigator.pop(context);
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+        ],
+      );
+    },
+  );
 }
 
 // class Rotation extends StatelessWidget {
