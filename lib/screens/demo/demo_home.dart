@@ -254,25 +254,46 @@ class _HomeDemoAppState extends State<HomeDemoApp> with WidgetsBindingObserver {
             '1080p',
             style: TextStyle(fontSize: 14, color: CupertinoColors.white),
           ),
-          leading: CupertinoButton(
-            onPressed: isRecordingInProgress
-                ? () {
-                    print('not available while recording');
-                  }
-                : () {
-                    onNewCameraSelected(
-                      cameras[isRearCameraSelected ? 1 : 0],
-                    );
-                    setState(() {
-                      isRearCameraSelected = !isRearCameraSelected;
-                    });
-                  },
-            child: Icon(
-              CupertinoIcons.camera_rotate,
-              size: 20,
-              color: CupertinoColors.white,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: CupertinoButton(
+              padding: EdgeInsets.only(right: 15),
+              child: Text(
+                'Clips',
+                style: TextStyle(
+                  color: CupertinoColors.white,
+                  fontSize: 15,
+                ),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DemoIOSEditClipPage(),
+                  ),
+                );
+              },
             ),
           ),
+          // CupertinoButton(
+          //   onPressed: isRecordingInProgress
+          //       ? () {
+          //           print('not available while recording');
+          //         }
+          //       : () {
+          //           onNewCameraSelected(
+          //             cameras[isRearCameraSelected ? 1 : 0],
+          //           );
+          //           setState(() {
+          //             isRearCameraSelected = !isRearCameraSelected;
+          //           });
+          //         },
+          //   child: Icon(
+          //     CupertinoIcons.camera_rotate,
+          //     size: 20,
+          //     color: CupertinoColors.white,
+          //   ),
+          // ),
         ),
         backgroundColor: CupertinoColors.black,
         child: oreintation == Orientation.landscape

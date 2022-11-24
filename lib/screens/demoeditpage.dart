@@ -5,6 +5,7 @@ import 'package:clip_test/screens/testing/testthumb_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
@@ -25,9 +26,9 @@ class _DemoIOSEditClipPageState extends State<DemoIOSEditClipPage> {
   void initState() {
     Provider.of<NotificationController>(context, listen: false).initialize();
     // TODO: implement initState
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
+    // SystemChrome.setPreferredOrientations([
+    //   DeviceOrientation.portraitUp,
+    // ]);
     super.initState();
   }
 
@@ -42,6 +43,40 @@ class _DemoIOSEditClipPageState extends State<DemoIOSEditClipPage> {
   // ]);
   //   super.dispose();
   // }
+
+  Future<void> _delteAllPopBox(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Delete'),
+          content: Text('Do you want to delete all Clips?'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+                child: const Text('No'),
+                onPressed: () {
+                  Navigator.pop(context);
+                }),
+            CupertinoDialogAction(
+              child: const Text('Yes'),
+              onPressed: () async {
+                // EasyLoading.show(status: 'Session Saving...');
+                // // await GallerySaver.saveVideo(path);
+                // //  showInSnackBar('Recording saved to gallery');
+                // EasyLoading.showSuccess('Session saved to Gallery');
+                final box = await Hive.openBox<VideoFileModel>('clipedvideo');
+                await box.deleteAll(box.keys);
+
+                // EasyLoading.dismiss();
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -130,24 +165,22 @@ class _DemoIOSEditClipPageState extends State<DemoIOSEditClipPage> {
         trailing: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            clipCon.isMultiSelectionEnabled
-                ? Visibility(
-                    visible: clipCon.selectedItem.isNotEmpty,
-                    child: CupertinoButton(
-                      padding: EdgeInsets.only(right: 15),
-                      child: Text(
-                        'Delete',
-                        style: TextStyle(
-                          color: CupertinoColors.white,
-                          fontSize: 15,
-                        ),
-                      ),
-                      onPressed: () {
-                        clipCon.removeClisssssp();
-                      },
-                    ),
-                  )
-                : Container(),
+            Visibility(
+              visible: clipCon.selectedItem.isEmpty,
+              child: CupertinoButton(
+                padding: EdgeInsets.only(right: 15),
+                child: Text(
+                  'Delete All',
+                  style: TextStyle(
+                    color: CupertinoColors.white,
+                    fontSize: 15,
+                  ),
+                ),
+                onPressed: () {
+                  _delteAllPopBox(context);
+                },
+              ),
+            ),
             clipCon.isMultiSelectionEnabled
                 ? Visibility(
                     visible: clipCon.selectedItem.isNotEmpty,
@@ -182,10 +215,13 @@ class _DemoIOSEditClipPageState extends State<DemoIOSEditClipPage> {
                         fontSize: 15,
                       ),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
+                      final box =
+                          await Hive.openBox<VideoFileModel>('clipedvideo');
+                      final clipList =
+                          box.values.toList().cast<VideoFileModel>();
                       clipCon.isMultiSelectionValue(true);
-                      clipCon
-                          .doMultiSelection(clipCon.clippedSessionList.first);
+                      clipCon.doMultiSelection(clipList.first);
                     },
                   )
                 : SizedBox.shrink(),
@@ -195,7 +231,7 @@ class _DemoIOSEditClipPageState extends State<DemoIOSEditClipPage> {
                     child: CupertinoButton(
                       padding: EdgeInsets.only(right: 15),
                       child: Text(
-                        'Merge Edits',
+                        'Merge Trims',
                         style: TextStyle(
                           color: CupertinoColors.white,
                           fontSize: 15,
@@ -283,7 +319,7 @@ class _DemoIOSEditClipPageState extends State<DemoIOSEditClipPage> {
               return Text(snapshot.hasError.toString());
             } else
               return Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(color: Colors.white),
               );
           }),
     );
